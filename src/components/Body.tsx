@@ -1,16 +1,15 @@
 import React from 'react';
 
-import { Row } from 'antd';
-import { AsideServers } from './AsideServers';
+import { AsideServers } from './AsideServers/AsideServers';
 import { Main } from './Main';
 import { AsideContacts } from './AsideContacts';
 
 export const Body: React.FC = () => {
   return (
-    <Row className="h-full">
+    <section className="h-full flex">
       <AsideServers />
       <Main />
       <AsideContacts />
-    </Row>
+    </section>
   );
 };

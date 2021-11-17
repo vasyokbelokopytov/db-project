@@ -1,11 +1,5 @@
 import React from 'react';
 
-import { Col } from 'antd';
-
 export const AsideContacts: React.FC = () => {
-  return (
-    <Col flex="200px" className="p-2">
-      100px
-    </Col>
-  );
+  return <aside className="flex-none w-56 border-l-2 p-2">w-56</aside>;
 };
