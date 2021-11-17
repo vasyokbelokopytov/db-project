@@ -1,20 +1,26 @@
 import React from 'react';
 
+import { Row, Col, Avatar, Button } from 'antd';
+import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
+
 import logo from '../assets/logo.png';
-import { UserCircleIcon } from '@heroicons/react/solid';
+import Text from 'antd/lib/typography/Text';
 
 export const Header: React.FC = () => {
   return (
-    <header className="px-4 py-2">
-      <div className="w-full h-full flex justify-between items-center">
-        <div className="flex gap-4 items-center">
-          <img className="h-14" src={logo} alt="kpi logo" />
-          <h1 className="font-title font-semibold text-xl">KPI Network</h1>
+    <Row className="border-b-2">
+      <Col flex="65px" className="flex flex-col gap-4 items-center p-2">
+        <img src={logo} alt="kpi logo" className="w-14" />
+      </Col>
+      <Col flex="auto" className="p-2"></Col>
+      <Col flex="200px" className="flex justify-between items-center p-2">
+        <div className="w-4">
+          <Avatar size="large" icon={<UserOutlined />} />
+          <Text strong>zloykreckerzloykreckerzloykreckerzloykrecker</Text>
         </div>
-        <div className="">
-          <UserCircleIcon className="h-5 w-5" />
-        </div>
-      </div>
-    </header>
+
+        <Button type="link" icon={<LogoutOutlined />} />
+      </Col>
+    </Row>
   );
 };
