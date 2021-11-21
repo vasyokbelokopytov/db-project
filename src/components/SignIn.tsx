@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Form, Input, Button } from 'antd';
+import { Link } from 'react-router-dom';
 
 type Status = 'lecturer' | 'student';
 
@@ -18,7 +19,7 @@ export const SignIn: React.FC = () => {
   };
 
   return (
-    <div className="w-96 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+    <div className="w-96 ml-auto mr-auto self-center">
       <Form name="login" onFinish={submitHandler}>
         <Form.Item
           name="login"
@@ -50,6 +51,11 @@ export const SignIn: React.FC = () => {
           <Button type="primary" htmlType="submit">
             Війти
           </Button>
+          <Link to="/sign-up">
+            <div className="inline-block text-blue-500 py-1 px-3 hover:text-blue-400 focus:text-blue-400">
+              Зареєструватися
+            </div>
+          </Link>
         </Form.Item>
       </Form>
     </div>

@@ -1,28 +1,12 @@
 import React, { useState } from 'react';
 
 import { Form, Input, Select, Button } from 'antd';
+import { Status, User } from '../app/types';
+import { Link } from 'react-router-dom';
 
 const { Option } = Select;
 
-type Status = 'lecturer' | 'student';
-
-interface FormValuesBasic {
-  login: string;
-  password: string;
-  name: string;
-  status: Status;
-  faculty: string;
-}
-
-interface StudentFormValues {
-  group: string;
-}
-
-interface LecturerFormValues {
-  department: string;
-}
-
-type FormValues = FormValuesBasic | StudentFormValues | LecturerFormValues;
+type FormValues = User & { password: string };
 
 export const SignUp: React.FC = () => {
   const [status, setStatus] = useState<Status | null>(null);
@@ -62,7 +46,7 @@ export const SignUp: React.FC = () => {
   };
 
   return (
-    <div className="w-96 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+    <div className="w-96 ml-auto mr-auto self-center">
       <Form name="registration" onFinish={submitHandler}>
         <Form.Item
           name="login"
@@ -151,7 +135,11 @@ export const SignUp: React.FC = () => {
           <Button type="primary" htmlType="submit">
             Зареєструватися
           </Button>
-          <Button type="link">Вхід</Button>
+          <Link to="/sign-in">
+            <div className="inline-block text-blue-500 py-1 px-3 hover:text-blue-400 focus:text-blue-400">
+              Вхід
+            </div>
+          </Link>
         </Form.Item>
       </Form>
     </div>
