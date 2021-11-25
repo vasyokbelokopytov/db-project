@@ -1,6 +1,6 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { User } from '../../app/types';
-import { authAPI } from './authAPI';
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { User } from "../../app/types";
+import { authAPI } from "./authAPI";
 
 export interface SignInData {
   login: string;
@@ -19,31 +19,31 @@ const initialState: AuthState = {
   error: null,
 };
 
-export const authorize = createAsyncThunk('auth/AUTHORIZED', async () => {
+export const authorize = createAsyncThunk("auth/authorized", async () => {
   const response = await authAPI.authorize();
   return response;
 });
 
 export const signIn = createAsyncThunk(
-  'auth/SIGNED_IN',
+  "auth/SIGNED_IN",
   async ({ login, password }: SignInData) => {
     const response = await authAPI.signIn({ login, password });
     return response;
   }
 );
 
-export const signUp = createAsyncThunk('auth/SIGNED_UP', async (user: User) => {
+export const signUp = createAsyncThunk("auth/signed_up", async (user: User) => {
   const response = await authAPI.signUp(user);
   return response;
 });
 
-export const signOut = createAsyncThunk('auth/SIGNED_OUT', async () => {
+export const signOut = createAsyncThunk("auth/signed_out", async () => {
   const response = await authAPI.signOut();
   return response;
 });
 
 export const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {},
 

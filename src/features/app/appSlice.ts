@@ -15,11 +15,14 @@ const initialState: AppState = {
   error: null,
 };
 
-export const init = createAsyncThunk('app/INIT', async (_, { dispatch }) => {
+export const init = createAsyncThunk('app/init', async (_, { dispatch }) => {
   const authResponse = await dispatch(authorize()).unwrap();
+
   if (authResponse.data.id && !authResponse.errors.length) {
-    await dispatch(fetchUser(authResponse.data.id));
-    await dispatch(fetchUserChannels());
+    await Promise.all([
+      dispatch(fetchUser(authResponse.data.id)).unwrap(),
+      dispatch(fetchUserChannels()).unwrap(),
+    ]);
   }
 });
 

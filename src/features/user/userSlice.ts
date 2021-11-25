@@ -22,7 +22,7 @@ const initialState: UserState = {
 };
 
 export const fetchUser = createAsyncThunk(
-  'user/FETCHED',
+  'user/fetched',
   async (id: number) => {
     const response = await userAPI.get(id);
     return response;
@@ -30,15 +30,15 @@ export const fetchUser = createAsyncThunk(
 );
 
 export const updateUser = createAsyncThunk(
-  'user/UPDATED',
-  async (userData: User) => {
+  'user/updated',
+  async (userData: Partial<User>) => {
     const response = await userAPI.update(userData);
-    return userData;
+    return response;
   }
 );
 
 export const fetchUserChannels = createAsyncThunk(
-  'user/CHANNELS_FETCHED',
+  'user/channels_fetched',
   async () => {
     const response = await userAPI.getChannels();
     return response;
@@ -74,10 +74,7 @@ export const userSlice = createSlice({
       .addCase(updateUser.fulfilled, (state, action) => {
         state.isLoading = false;
         if (state.user) {
-          state.user = {
-            id: state.user.id,
-            ...action.payload,
-          };
+          state.user = action.payload.data;
         }
       })
       .addCase(updateUser.rejected, (state, action) => {

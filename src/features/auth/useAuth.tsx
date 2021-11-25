@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { authorize, signIn, SignInData, signOut } from './authSlice';
@@ -25,11 +26,13 @@ export const useAuth = () => {
   };
 };
 
-export const useAuthRedirect = () => {
+export const useRedirectFromAuth = () => {
   const authId = useAppSelector((state) => state.auth.id);
   const navigate = useNavigate();
 
-  if (!authId) {
-    navigate('/');
-  }
+  useEffect(() => {
+    if (authId) {
+      navigate('/');
+    }
+  }, [authId, navigate]);
 };

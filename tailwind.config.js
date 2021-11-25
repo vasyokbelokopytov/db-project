@@ -8,6 +8,10 @@ module.exports = {
     extend: {
       width: {
         18: '4.5rem',
+        50: '12.5rem',
+      },
+      height: {
+        50: '12.5rem',
       },
     },
   },

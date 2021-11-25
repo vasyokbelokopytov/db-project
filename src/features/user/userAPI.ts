@@ -12,11 +12,11 @@ export const userAPI = {
         () =>
           res({
             data: {
-              group: 'authorize group',
-              faculty: 'st',
+              group: 'КМ-83',
+              faculty: 'ФПМ',
               id: 1,
-              login: 'auther',
-              name: 'not me',
+              login: 'zloykrecker',
+              name: 'Бєлокопитов Василь Олександрович',
               status: 'student',
               photo: null,
             },
@@ -27,12 +27,20 @@ export const userAPI = {
     });
   },
 
-  update: (userData: User) => {
-    return new Promise<Response<{}>>((res) => {
+  update: (userData: Partial<User>) => {
+    return new Promise<Response<UserWithId>>((res) => {
       setTimeout(
         () =>
           res({
-            data: {},
+            data: {
+              department: 'hu',
+              faculty: 'ФПМF',
+              id: 1,
+              login: 'vvv',
+              name: 'Бєлокопитов Василь Олександрович',
+              status: 'lecturer',
+              photo: userData.photo ?? null,
+            },
             errors: [],
           }),
         1000

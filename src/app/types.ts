@@ -22,11 +22,17 @@ export type User = Lecturer | Student;
 
 export type UserWithId = User & { id: number };
 
-export interface ChannelPreview {
+export interface Channel {
   id: number;
   name: string;
   photo: string | null;
 }
+
+export interface ChannelWithId extends Channel {
+  id: number;
+}
+
+export type ChannelPreview = Pick<Channel, 'id' | 'name' | 'photo'>;
 
 export interface Response<T> {
   data: T;

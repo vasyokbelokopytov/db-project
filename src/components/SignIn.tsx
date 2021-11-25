@@ -2,6 +2,7 @@ import React from 'react';
 
 import { Form, Input, Button } from 'antd';
 import { Link } from 'react-router-dom';
+import { useRedirectFromAuth } from '../features/auth/useAuth';
 
 type Status = 'lecturer' | 'student';
 
@@ -14,6 +15,7 @@ interface FormValues {
 }
 
 export const SignIn: React.FC = () => {
+  useRedirectFromAuth();
   const submitHandler = (values: FormValues) => {
     console.log(values);
   };

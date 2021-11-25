@@ -1,19 +1,31 @@
 import React, { useState } from 'react';
-
 import { Form, Input, Select, Button } from 'antd';
 import { Status, User } from '../app/types';
 import { Link } from 'react-router-dom';
+import { Rule } from 'rc-field-form/lib/interface';
+import { useRedirectFromAuth } from '../features/auth/useAuth';
 
 const { Option } = Select;
 
 type FormValues = User & { password: string };
 
+type Statuses = {
+  [key in Status]: {
+    name: string;
+    selectValue: string;
+    rules: Rule[];
+    inputPlaceholder: string;
+  };
+};
+
 export const SignUp: React.FC = () => {
   const [status, setStatus] = useState<Status | null>(null);
+  useRedirectFromAuth();
 
-  const statuses = {
+  const statuses: Statuses = {
     lecturer: {
       name: 'department',
+      selectValue: 'Викладач',
       rules: [
         {
           required: true,
@@ -21,11 +33,12 @@ export const SignUp: React.FC = () => {
           whitespace: true,
         },
       ],
-      placeholder: 'Ваша кафедра',
+      inputPlaceholder: 'Ваша кафедра',
     },
 
     student: {
       name: 'group',
+      selectValue: 'Студент',
       rules: [
         {
           required: true,
@@ -33,7 +46,7 @@ export const SignUp: React.FC = () => {
           whitespace: true,
         },
       ],
-      placeholder: 'Ваша група',
+      inputPlaceholder: 'Ваша група',
     },
   };
 
@@ -103,7 +116,16 @@ export const SignUp: React.FC = () => {
           ]}
         >
           <Select placeholder="Ваш статус" onChange={statusChangeHandler}>
-            <Option value="student">Студент</Option>
+            {(Object.keys(statuses) as Array<keyof typeof statuses>).map(
+              (status) => {
+                return (
+                  <Option key={status} value={status}>
+                    {statuses[status].selectValue}
+                  </Option>
+                );
+              }
+            )}
+            <Option value="student">{statuses.student.selectValue}</Option>
             <Option value="lecturer">Викладач</Option>
           </Select>
         </Form.Item>
@@ -127,7 +149,7 @@ export const SignUp: React.FC = () => {
         >
           <Input
             disabled={!status}
-            placeholder={!status ? '' : statuses[status].placeholder}
+            placeholder={!status ? '' : statuses[status].inputPlaceholder}
           />
         </Form.Item>
 
