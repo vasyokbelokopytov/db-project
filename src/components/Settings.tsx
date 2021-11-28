@@ -1,12 +1,9 @@
-import React, { useState } from 'react';
-import { Form, Input, Select, Button, Upload, message, Avatar } from 'antd';
+import React from 'react';
+import { Form, Input, Select, Button, Upload, Avatar } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { Status, User } from '../app/types';
-import { useAppSelector } from '../app/hooks';
+import { useAppSelector, useImageUpload } from '../app/hooks';
 import { Rule } from 'rc-field-form/lib/interface';
-import { UploadRequestOption } from 'rc-upload/lib/interface';
-import { UploadChangeParam, RcFile } from 'antd/lib/upload';
-import { UploadFile } from 'antd/lib/upload/interface';
 import { useDispatch } from 'react-redux';
 import { updateUser } from '../features/user/userSlice';
 
@@ -21,52 +18,17 @@ type Statuses = {
   };
 };
 
-const dummyRequest = ({ onSuccess }: UploadRequestOption<any>) => {
-  setTimeout(() => {
-    if (onSuccess) {
-      onSuccess('ok');
-    }
-  }, 0);
-};
-
-function getBase64(
-  img: RcFile | undefined,
-  callback: (url: string | null) => void
-) {
-  const reader = new FileReader();
-  reader.addEventListener('load', () =>
-    callback(reader.result as string | null)
-  );
-  reader.readAsDataURL(img as Blob);
-}
-
-function beforeUpload(file: File) {
-  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-  if (!isJpgOrPng) {
-    message.error('Будь ласка, завантажте JPG або PNG файл!');
-  }
-  const isLt2M = file.size / 1024 / 1024 < 2;
-  if (!isLt2M) {
-    message.error('Зображення має важити не більше 2MB!');
-  }
-  return isJpgOrPng && isLt2M;
-}
-
 export const Settings: React.FC = () => {
   const user = useAppSelector((state) => state.user.user);
+  const isLoading = useAppSelector((state) => state.user.isUserUpdating);
+
   const dispatch = useDispatch();
-  const [imageUrl, setImageUrl] = useState(user?.photo ?? null);
+  const { img, handleChange, beforeUpload, dummyRequest } = useImageUpload(
+    user?.photo ?? null
+  );
 
   const submitHandler = (values: FormValues) => {
-    dispatch(updateUser({ ...values, photo: imageUrl }));
-  };
-
-  const handleChange = (info: UploadChangeParam<UploadFile<any>>) => {
-    if (info.file.status === 'done') {
-      getBase64(info.file.originFileObj, (imageUrl) => {
-        setImageUrl(imageUrl);
-      });
-    }
+    dispatch(updateUser({ ...values, photo: img }));
   };
 
   const statuses: Statuses = {
@@ -107,12 +69,7 @@ export const Settings: React.FC = () => {
           customRequest={dummyRequest}
           onChange={handleChange}
         >
-          <Avatar
-            size={200}
-            shape="square"
-            src={imageUrl}
-            icon={<UserOutlined />}
-          />
+          <Avatar size={200} shape="square" src={img} icon={<UserOutlined />} />
         </Upload>
       </div>
 
@@ -161,7 +118,7 @@ export const Settings: React.FC = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" loading={isLoading}>
               Застосувати зміни
             </Button>
           </Form.Item>

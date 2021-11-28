@@ -3,7 +3,8 @@ import { Form, Input, Select, Button } from 'antd';
 import { Status, User } from '../app/types';
 import { Link } from 'react-router-dom';
 import { Rule } from 'rc-field-form/lib/interface';
-import { useRedirectFromAuth } from '../features/auth/useAuth';
+import { useRedirectFromAuth } from '../features/auth/hooks';
+import { useAppSelector } from '../app/hooks';
 
 const { Option } = Select;
 
@@ -19,6 +20,7 @@ type Statuses = {
 };
 
 export const SignUp: React.FC = () => {
+  const isLoading = useAppSelector((state) => state.auth.isSigningUp);
   const [status, setStatus] = useState<Status | null>(null);
   useRedirectFromAuth();
 
@@ -154,7 +156,7 @@ export const SignUp: React.FC = () => {
         </Form.Item>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" loading={isLoading}>
             Зареєструватися
           </Button>
           <Link to="/sign-in">

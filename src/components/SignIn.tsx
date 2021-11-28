@@ -2,7 +2,8 @@ import React from 'react';
 
 import { Form, Input, Button } from 'antd';
 import { Link } from 'react-router-dom';
-import { useRedirectFromAuth } from '../features/auth/useAuth';
+import { useRedirectFromAuth } from '../features/auth/hooks';
+import { useAppSelector } from '../app/hooks';
 
 type Status = 'lecturer' | 'student';
 
@@ -15,6 +16,7 @@ interface FormValues {
 }
 
 export const SignIn: React.FC = () => {
+  const isLoading = useAppSelector((state) => state.auth.isSigningIn);
   useRedirectFromAuth();
   const submitHandler = (values: FormValues) => {
     console.log(values);
@@ -50,7 +52,7 @@ export const SignIn: React.FC = () => {
         </Form.Item>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" loading={isLoading}>
             Війти
           </Button>
           <Link to="/sign-up">

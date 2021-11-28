@@ -4,21 +4,28 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 interface UserState {
   user: UserWithId | null;
+  isUserFetching: boolean;
+  isUserUpdating: boolean;
+
   channels: ChannelPreview[];
   isChannelsFetching: boolean;
-  isLoading: boolean;
-  error: null | string;
+
   isSettingsOpened: boolean;
+
+  error: null | string;
 }
 
 const initialState: UserState = {
   user: null,
+  isUserFetching: true,
+  isUserUpdating: false,
+
   channels: [],
   isChannelsFetching: false,
-  isLoading: true,
-  error: null,
 
   isSettingsOpened: false,
+
+  error: null,
 };
 
 export const fetchUser = createAsyncThunk(
@@ -52,34 +59,38 @@ export const userSlice = createSlice({
     toggleSettings: (state) => {
       state.isSettingsOpened = !state.isSettingsOpened;
     },
+
+    addChannel: (state, action) => {
+      state.channels.push(action.payload);
+    },
   },
 
   extraReducers: (builder) => {
     builder
       .addCase(fetchUser.pending, (state) => {
-        state.isLoading = true;
+        state.isUserFetching = true;
       })
       .addCase(fetchUser.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.isUserFetching = false;
         state.user = action.payload.data;
       })
       .addCase(fetchUser.rejected, (state, action) => {
         state.error = action.error.message ?? null;
-        state.isLoading = false;
+        state.isUserFetching = false;
       })
 
       .addCase(updateUser.pending, (state) => {
-        state.isLoading = true;
+        state.isUserUpdating = true;
       })
       .addCase(updateUser.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.isUserUpdating = false;
         if (state.user) {
           state.user = action.payload.data;
         }
       })
       .addCase(updateUser.rejected, (state, action) => {
         state.error = action.error.message ?? null;
-        state.isLoading = false;
+        state.isUserUpdating = false;
       })
 
       .addCase(fetchUserChannels.pending, (state) => {
@@ -96,6 +107,6 @@ export const userSlice = createSlice({
   },
 });
 
-export const { toggleSettings } = userSlice.actions;
+export const { toggleSettings, addChannel } = userSlice.actions;
 
 export default userSlice.reducer;
