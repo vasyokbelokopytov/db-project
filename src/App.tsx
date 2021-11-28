@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import { Body } from './components/Body';
+import { Channel } from './components/Channel/Channel';
 import { EmptyMain } from './components/EmptyMain';
 
 import { Header } from './components/Header/Header';
@@ -13,23 +14,38 @@ import { init } from './features/app/appSlice';
 import { PrivateRoute } from './features/auth/PrivateRoute';
 
 export const App: React.FC = () => {
-  const isLoading = useAppSelector((state) => state.app.isLoading);
+  const isInit = useAppSelector((state) => state.app.isInit);
   const dispatch = useAppDispatch();
   useEffect(() => {
-    dispatch(init());
-  }, [dispatch]);
+    if (!isInit) {
+      dispatch(init());
+    }
+  }, [dispatch, isInit]);
 
-  if (isLoading) return <Init />;
+  if (!isInit) return <Init />;
 
   return (
     <div className="box-border h-screen flex flex-col">
       <Header />
-      <section className="h-full flex">
+      <section className="flex-grow flex overflow-hidden">
         <Routes>
-          <Route path="/sign-in" element={<SignIn />} />
-          <Route path="/sign-up" element={<SignUp />} />
           <Route path="/" element={<Body />}>
-            <Route index element={<EmptyMain />} />
+            <Route
+              index
+              element={
+                <PrivateRoute>
+                  <EmptyMain />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/channel/:channelId"
+              element={
+                <PrivateRoute>
+                  <Channel />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="/settings"
               element={
@@ -39,6 +55,8 @@ export const App: React.FC = () => {
               }
             />
           </Route>
+          <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/sign-up" element={<SignUp />} />
         </Routes>
       </section>
     </div>

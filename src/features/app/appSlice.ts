@@ -1,7 +1,6 @@
 import { fetchUser, fetchUserChannels } from './../user/userSlice';
 import { authorize } from './../auth/authSlice';
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AppThunk } from '../../app/store';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 interface AppState {
   isInit: boolean;

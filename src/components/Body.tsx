@@ -1,14 +1,18 @@
 import React from 'react';
 
-import { AsideServers } from './AsideServers/AsideServers';
+import { AsideChannels } from './AsideChannels/AsideChannels';
 import { AsideContacts } from './AsideContacts';
 import { Outlet } from 'react-router';
+import { CreateChannelForm } from './Channel/CreateChannelForm';
+import { EditChannelForm } from './Channel/EditChannelForm';
 
 export const Body: React.FC = () => {
   return (
     <>
-      <AsideServers />
-      <main className="flex justify-center items-center flex-grow bg-white p-2">
+      <AsideChannels />
+      <main className="flex justify-center items-center flex-grow bg-white p-6">
+        <CreateChannelForm />
+        <EditChannelForm />
         <Outlet />
       </main>
       <AsideContacts />
