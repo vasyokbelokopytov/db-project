@@ -1,6 +1,6 @@
 import { Response, Channel, ChannelWithId } from './../../app/types';
 
-export const userAPI = {
+export const channelAPI = {
   get: (id: number) => {
     return new Promise<Response<ChannelWithId>>((res) => {
       setTimeout(
@@ -23,7 +23,7 @@ export const userAPI = {
       setTimeout(
         () =>
           res({
-            data: channel,
+            data: { id: Math.random(), ...channel },
             errors: [],
           }),
         1000
@@ -31,7 +31,7 @@ export const userAPI = {
     });
   },
 
-  update: (userData: Partial<Channel>) => {
+  update: (channelWithId: Partial<ChannelWithId>) => {
     return new Promise<Response<ChannelWithId>>((res) => {
       setTimeout(
         () =>
