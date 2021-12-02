@@ -1,4 +1,4 @@
-import { ChannelWithId, Channel } from './../../app/types';
+import { ChannelWithId, Channel, Post } from './../../app/types';
 import { channelAPI } from './channelAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { addChannel } from '../user/userSlice';
@@ -101,7 +101,7 @@ const channelSlice = createSlice({
         state.error = action.error.message ?? null;
       })
 
-      .addCase(editChannel.pending, (state, action) => {
+      .addCase(editChannel.pending, (state) => {
         state.isEditing = true;
       })
       .addCase(editChannel.fulfilled, (state, action) => {

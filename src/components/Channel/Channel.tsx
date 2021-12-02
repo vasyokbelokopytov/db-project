@@ -8,7 +8,7 @@ import {
   fetchChannel,
 } from '../../features/channel/channelSlice';
 import { Display } from './Display';
-import { Form } from './Form';
+import { Field } from './Field';
 
 export const Channel: React.FC = () => {
   const channel = useAppSelector((state) => state.channel.channel);
@@ -49,7 +49,7 @@ export const Channel: React.FC = () => {
         }}
       >
         <Display />
-        <Form />
+        <Field />
       </Card>
     );
 

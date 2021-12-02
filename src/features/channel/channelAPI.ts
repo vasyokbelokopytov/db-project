@@ -1,4 +1,10 @@
-import { Response, Channel, ChannelWithId } from './../../app/types';
+import {
+  Response,
+  Channel,
+  ChannelWithId,
+  Post,
+  ItemsResponse,
+} from './../../app/types';
 
 export const channelAPI = {
   get: (id: number) => {

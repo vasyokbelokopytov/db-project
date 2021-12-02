@@ -2,7 +2,7 @@ import { userAPI } from './userAPI';
 import { User, UserWithId, ChannelPreview } from './../../app/types';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
-interface UserState {
+export interface UserState {
   user: UserWithId | null;
   isUserFetching: boolean;
   isUserUpdating: boolean;

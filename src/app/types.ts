@@ -33,10 +33,26 @@ export interface ChannelWithId extends Channel {
 
 export type ChannelPreview = Pick<ChannelWithId, 'id' | 'name' | 'photo'>;
 
+export interface Post {
+  text: string;
+  authorId: number;
+}
+
+export interface PostWithId extends Post {
+  id: number;
+}
+
 export interface Response<T> {
   data: T;
   errors: string[];
 }
+
+export interface ItemsData<T> {
+  items: T;
+  total: number | null;
+}
+
+export type ItemsResponse<T> = Response<ItemsData<T>>;
 
 export interface AuthData {
   id?: number;
