@@ -1,11 +1,6 @@
-import { Avatar, Spin } from 'antd';
-import Text from 'antd/lib/typography/Text';
-import React, { useEffect } from 'react';
-import { Comment, List } from 'antd';
-
-import { useParams } from 'react-router';
-import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { fetchChannel } from '../../features/channel/channelSlice';
+import { Avatar } from 'antd';
+import React from 'react';
+import { List } from 'antd';
 
 const data = [
   {
@@ -110,7 +105,6 @@ export const Display: React.FC = () => {
   return (
     <List
       className="flex-grow overflow-y-scroll"
-      split={false}
       dataSource={data}
       renderItem={(item) => (
         <List.Item key={item.id} className="bg-white rounded-sm mb-2">

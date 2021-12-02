@@ -4,13 +4,11 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 interface AppState {
   isInit: boolean;
-  isLoading: boolean;
   error: string | null;
 }
 
 const initialState: AppState = {
   isInit: false,
-  isLoading: false,
   error: null,
 };
 
@@ -32,11 +30,15 @@ const appSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(init.pending, (state) => {
-        state.isLoading = true;
+        state.isInit = false;
+        state.error = null;
       })
       .addCase(init.fulfilled, (state) => {
-        state.isLoading = false;
         state.isInit = true;
+      })
+      .addCase(init.rejected, (state, action) => {
+        state.isInit = false;
+        state.error = action.error.message ?? null;
       });
   },
 });
