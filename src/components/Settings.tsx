@@ -1,22 +1,16 @@
 import React from 'react';
-import { Form, Input, Select, Button, Upload, Avatar } from 'antd';
+import { Form, Input, Button, Upload, Avatar, Space } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
-import { Status, User } from '../app/types';
 import { useAppSelector, useImageUpload } from '../app/hooks';
-import { Rule } from 'rc-field-form/lib/interface';
 import { useDispatch } from 'react-redux';
 import { updateUser } from '../features/user/userSlice';
+import { signOut } from '../features/auth/authSlice';
 
-type FormValues = Partial<User>;
-
-type Statuses = {
-  [key in Status]: {
-    name: string;
-    selectValue: string;
-    rules: Rule[];
-    inputPlaceholder: string;
-  };
-};
+export interface SettingsFormValues {
+  name: string;
+  department: string;
+  group?: string;
+}
 
 export const Settings: React.FC = () => {
   const user = useAppSelector((state) => state.user.user);
@@ -27,41 +21,13 @@ export const Settings: React.FC = () => {
     user?.photo ?? null
   );
 
-  const submitHandler = (values: FormValues) => {
+  const submitHandler = (values: SettingsFormValues) => {
     dispatch(updateUser({ ...values, photo: img }));
-  };
-
-  const statuses: Statuses = {
-    lecturer: {
-      name: 'department',
-      selectValue: 'Викладач',
-      rules: [
-        {
-          required: true,
-          message: 'Будь ласка, введіть назву вашої кафедри',
-          whitespace: true,
-        },
-      ],
-      inputPlaceholder: 'Ваша кафедра',
-    },
-
-    student: {
-      name: 'group',
-      selectValue: 'Студент',
-      rules: [
-        {
-          required: true,
-          message: 'Будь ласка, введіть назву вашої групи',
-          whitespace: true,
-        },
-      ],
-      inputPlaceholder: 'Ваша група',
-    },
   };
 
   return (
     <div className="flex gap-5 ml-auto mr-auto self-center">
-      <div className="">
+      <div>
         <Upload
           name="avatar"
           showUploadList={false}
@@ -90,37 +56,45 @@ export const Settings: React.FC = () => {
           </Form.Item>
 
           <Form.Item
-            name="status"
-            initialValue={user ? statuses[user?.status].selectValue : ''}
+            name="department"
+            initialValue={user?.department}
+            rules={[
+              {
+                required: true,
+                message: 'Будь ласка, введіть назву вашої кафедри',
+                whitespace: true,
+              },
+            ]}
           >
-            <Select disabled></Select>
+            <Input value={user?.department} placeholder="Ваша кафедра" />
           </Form.Item>
+
+          {user?.status === 'student' && (
+            <Form.Item
+              name="group"
+              rules={[
+                {
+                  required: true,
+                  message: 'Будь ласка, введіть назву вашої групи',
+                  whitespace: true,
+                },
+              ]}
+              initialValue={user.group}
+            >
+              <Input placeholder="Ваша група" />
+            </Form.Item>
+          )}
 
           <Form.Item>
-            <Input value={user?.faculty} placeholder="Ваш факультет" disabled />
-          </Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit" loading={isLoading}>
+                Застосувати зміни
+              </Button>
 
-          <Form.Item
-            name={user ? statuses[user.status].name : ''}
-            rules={user ? statuses[user.status].rules : []}
-            initialValue={
-              user &&
-              (user.status === 'lecturer'
-                ? user.department
-                : user.status === 'student'
-                ? user.group
-                : '')
-            }
-          >
-            <Input
-              placeholder={user ? statuses[user?.status].inputPlaceholder : ''}
-            />
-          </Form.Item>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={isLoading}>
-              Застосувати зміни
-            </Button>
+              <Button onClick={() => dispatch(signOut())}>
+                Вийти з акаунту
+              </Button>
+            </Space>
           </Form.Item>
         </Form>
       </div>

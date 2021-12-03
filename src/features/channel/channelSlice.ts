@@ -1,10 +1,10 @@
-import { ChannelWithId, Channel, Post } from './../../app/types';
+import { Channel, WithId, WithPhoto } from './../../app/types';
 import { channelAPI } from './channelAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { addChannel } from '../user/userSlice';
 
 export interface ChannelState {
-  channel: ChannelWithId | null;
+  channel: (Channel & WithId & WithPhoto) | null;
 
   isCreatorOpened: boolean;
   isCreating: boolean;
@@ -39,7 +39,7 @@ export const fetchChannel = createAsyncThunk(
 
 export const createChannel = createAsyncThunk(
   'channel/created',
-  async (channel: Channel, { dispatch }) => {
+  async (channel: Channel & WithPhoto, { dispatch }) => {
     const response = await channelAPI.create(channel);
     dispatch(addChannel(response.data));
     dispatch(creatorClosed());
@@ -49,7 +49,7 @@ export const createChannel = createAsyncThunk(
 
 export const editChannel = createAsyncThunk(
   'channel/edited',
-  async (channel: ChannelWithId, { dispatch }) => {
+  async (channel: Channel & WithId & WithPhoto, { dispatch }) => {
     const response = await channelAPI.update(channel);
     dispatch(editorClosed());
     return response;

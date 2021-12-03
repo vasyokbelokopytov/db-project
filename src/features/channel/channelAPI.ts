@@ -1,20 +1,15 @@
-import {
-  Response,
-  Channel,
-  ChannelWithId,
-  Post,
-  ItemsResponse,
-} from './../../app/types';
+import { Response, Channel, WithId, WithPhoto } from './../../app/types';
 
 export const channelAPI = {
   get: (id: number) => {
-    return new Promise<Response<ChannelWithId>>((res) => {
+    return new Promise<Response<Channel & WithId & WithPhoto>>((res) => {
       setTimeout(
         () =>
           res({
             data: {
               id,
               name: 'kpi',
+              description: 'about',
               photo: null,
             },
             errors: [],
@@ -24,8 +19,8 @@ export const channelAPI = {
     });
   },
 
-  create: (channel: Channel) => {
-    return new Promise<Response<ChannelWithId>>((res) => {
+  create: (channel: Channel & WithPhoto) => {
+    return new Promise<Response<Channel & WithId & WithPhoto>>((res) => {
       setTimeout(
         () =>
           res({
@@ -37,14 +32,15 @@ export const channelAPI = {
     });
   },
 
-  update: (channelWithId: Partial<ChannelWithId>) => {
-    return new Promise<Response<ChannelWithId>>((res) => {
+  update: (channel: Partial<Channel & WithPhoto>) => {
+    return new Promise<Response<Channel & WithId & WithPhoto>>((res) => {
       setTimeout(
         () =>
           res({
             data: {
               id: 4,
               name: 'updated',
+              description: 'about',
               photo: null,
             },
             errors: [],

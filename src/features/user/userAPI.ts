@@ -1,19 +1,21 @@
+import { SettingsFormValues } from './../../components/Settings';
 import {
   Response,
   User,
-  UserWithId,
   ChannelsPreviewData,
+  WithId,
+  WithPhoto,
 } from './../../app/types';
 
 export const userAPI = {
   get: (id: number) => {
-    return new Promise<Response<UserWithId>>((res) => {
+    return new Promise<Response<User & WithId & WithPhoto>>((res) => {
       setTimeout(
         () =>
           res({
             data: {
               group: 'КМ-83',
-              faculty: 'ФПМ',
+              department: 'ФПМ',
               id: 1,
               login: 'zloykrecker',
               name: 'Бєлокопитов Василь Олександрович',
@@ -27,19 +29,18 @@ export const userAPI = {
     });
   },
 
-  update: (userData: Partial<User>) => {
-    return new Promise<Response<UserWithId>>((res) => {
+  update: (userData: SettingsFormValues & WithPhoto) => {
+    return new Promise<Response<User & WithId & WithPhoto>>((res) => {
       setTimeout(
         () =>
           res({
             data: {
               department: 'hu',
-              faculty: 'ФПМF',
               id: 1,
               login: 'vvv',
               name: 'Бєлокопитов Василь Олександрович',
               status: 'lecturer',
-              photo: userData.photo ?? null,
+              photo: userData.photo,
             },
             errors: [],
           }),

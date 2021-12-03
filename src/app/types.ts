@@ -1,16 +1,26 @@
 export type Status = 'lecturer' | 'student';
 
+export interface WithId {
+  id: number;
+}
+
+export interface WithPhoto {
+  photo: string | null;
+}
+
+export interface WithPassword {
+  password: string;
+}
+
 export interface UserBasic {
   login: string;
   name: string;
-  faculty: string;
+  department: string;
   status: Status;
-  photo: null | string;
 }
 
 export interface Lecturer extends UserBasic {
   status: 'lecturer';
-  department: string;
 }
 
 export interface Student extends UserBasic {
@@ -20,26 +30,20 @@ export interface Student extends UserBasic {
 
 export type User = Lecturer | Student;
 
-export type UserWithId = User & { id: number };
-
 export interface Channel {
   name: string;
-  photo: string | null;
+  description: string;
 }
 
-export interface ChannelWithId extends Channel {
-  id: number;
-}
-
-export type ChannelPreview = Pick<ChannelWithId, 'id' | 'name' | 'photo'>;
+export type ChannelPreview = Pick<
+  Channel & WithId & WithPhoto,
+  'id' | 'name' | 'photo'
+>;
 
 export interface Post {
   text: string;
-  authorId: number;
-}
-
-export interface PostWithId extends Post {
-  id: number;
+  channelId: number;
+  author: User & WithId & WithPhoto;
 }
 
 export interface Response<T> {

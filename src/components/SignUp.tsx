@@ -1,56 +1,18 @@
 import React, { useState } from 'react';
 import { Form, Input, Select, Button } from 'antd';
-import { Status, User } from '../app/types';
+import { Status, User, WithPassword } from '../app/types';
 import { Link } from 'react-router-dom';
-import { Rule } from 'rc-field-form/lib/interface';
 import { useRedirectFromAuth } from '../features/auth/hooks';
 import { useAppSelector } from '../app/hooks';
 
 const { Option } = Select;
 
-type FormValues = User & { password: string };
-
-type Statuses = {
-  [key in Status]: {
-    name: string;
-    selectValue: string;
-    rules: Rule[];
-    inputPlaceholder: string;
-  };
-};
+type FormValues = User & WithPassword;
 
 export const SignUp: React.FC = () => {
   const isLoading = useAppSelector((state) => state.auth.isSigningUp);
   const [status, setStatus] = useState<Status | null>(null);
   useRedirectFromAuth();
-
-  const statuses: Statuses = {
-    lecturer: {
-      name: 'department',
-      selectValue: 'Викладач',
-      rules: [
-        {
-          required: true,
-          message: 'Будь ласка, введіть назву вашої кафедри',
-          whitespace: true,
-        },
-      ],
-      inputPlaceholder: 'Ваша кафедра',
-    },
-
-    student: {
-      name: 'group',
-      selectValue: 'Студент',
-      rules: [
-        {
-          required: true,
-          message: 'Будь ласка, введіть назву вашої групи',
-          whitespace: true,
-        },
-      ],
-      inputPlaceholder: 'Ваша група',
-    },
-  };
 
   const statusChangeHandler = (value: Status) => {
     setStatus(value);
@@ -118,42 +80,38 @@ export const SignUp: React.FC = () => {
           ]}
         >
           <Select placeholder="Ваш статус" onChange={statusChangeHandler}>
-            {(Object.keys(statuses) as Array<keyof typeof statuses>).map(
-              (status) => {
-                return (
-                  <Option key={status} value={status}>
-                    {statuses[status].selectValue}
-                  </Option>
-                );
-              }
-            )}
-            <Option value="student">{statuses.student.selectValue}</Option>
+            <Option value="student">Студент</Option>
             <Option value="lecturer">Викладач</Option>
           </Select>
         </Form.Item>
 
         <Form.Item
-          name="faculty"
+          name="department"
           rules={[
             {
               required: true,
-              message: 'Будь ласка, введіть назву Вашого факультету',
+              message: 'Будь ласка, введіть назву Вашої кафедри',
               whitespace: true,
             },
           ]}
         >
-          <Input placeholder="Ваш факультет" />
+          <Input placeholder="Ваша кафедра" />
         </Form.Item>
 
-        <Form.Item
-          name={!status ? undefined : statuses[status].name}
-          rules={!status ? [] : statuses[status].rules}
-        >
-          <Input
-            disabled={!status}
-            placeholder={!status ? '' : statuses[status].inputPlaceholder}
-          />
-        </Form.Item>
+        {status === 'student' && (
+          <Form.Item
+            name="group"
+            rules={[
+              {
+                required: true,
+                message: 'Будь ласка, введіть назву Вашої групи',
+                whitespace: true,
+              },
+            ]}
+          >
+            <Input placeholder="Ваша група" />
+          </Form.Item>
+        )}
 
         <Form.Item>
           <Button type="primary" htmlType="submit" loading={isLoading}>

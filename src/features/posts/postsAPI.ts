@@ -1,9 +1,9 @@
-import { PostWithId } from './../../app/types';
+import { WithId } from './../../app/types';
 import { Response, ItemsResponse, Post } from '../../app/types';
 
 export const postsAPI = {
   get: (channelId: number) => {
-    return new Promise<ItemsResponse<PostWithId[]>>((res) => {
+    return new Promise<ItemsResponse<(Post & WithId)[]>>((res) => {
       setTimeout(
         () =>
           res({
@@ -11,20 +11,44 @@ export const postsAPI = {
               items: [
                 {
                   id: 1,
-                  authorId: 2,
-                  text: 'bla',
+                  channelId: 3,
+                  author: {
+                    id: 1,
+                    login: 'масло1337',
+                    name: 'маслянко',
+                    status: 'lecturer',
+                    department: 'ПМА',
+                    photo: null,
+                  },
+                  text: 'blavdsv',
                 },
 
                 {
-                  id: 1,
-                  authorId: 1,
-                  text: 'bla bla',
+                  id: 2,
+                  channelId: 3,
+                  author: {
+                    id: 1,
+                    login: 'масло1337',
+                    name: 'маслянко',
+                    status: 'lecturer',
+                    department: 'ПМА',
+                    photo: null,
+                  },
+                  text: 'bdsvsdla',
                 },
 
                 {
-                  id: 1,
-                  authorId: 2,
-                  text: 'bla sho',
+                  id: 3,
+                  channelId: 3,
+                  author: {
+                    id: 1,
+                    login: 'масло1337',
+                    name: 'маслянко',
+                    status: 'lecturer',
+                    department: 'ПМА',
+                    photo: null,
+                  },
+                  text: 'bldvsdva',
                 },
               ],
               total: 5,
@@ -36,14 +60,22 @@ export const postsAPI = {
     });
   },
 
-  create: (post: Post, channelId: number) => {
-    return new Promise<Response<PostWithId>>((res) => {
+  create: (post: Omit<Post, 'author'>) => {
+    return new Promise<Response<Post & WithId>>((res) => {
       setTimeout(
         () =>
           res({
             data: {
               id: Math.random(),
               ...post,
+              author: {
+                id: 1,
+                login: 'масло1337',
+                name: 'маслянко',
+                status: 'lecturer',
+                department: 'ПМА',
+                photo: null,
+              },
             },
             errors: [],
           }),

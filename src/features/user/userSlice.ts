@@ -1,9 +1,10 @@
+import { SettingsFormValues } from './../../components/Settings';
 import { userAPI } from './userAPI';
-import { User, UserWithId, ChannelPreview } from './../../app/types';
+import { User, ChannelPreview, WithId, WithPhoto } from './../../app/types';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 export interface UserState {
-  user: UserWithId | null;
+  user: (User & WithId & WithPhoto) | null;
   isUserFetching: boolean;
   isUserUpdating: boolean;
 
@@ -38,7 +39,7 @@ export const fetchUser = createAsyncThunk(
 
 export const updateUser = createAsyncThunk(
   'user/updated',
-  async (userData: Partial<User>) => {
+  async (userData: SettingsFormValues & WithPhoto) => {
     const response = await userAPI.update(userData);
     return response;
   }

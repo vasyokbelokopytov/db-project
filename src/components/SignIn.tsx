@@ -1,19 +1,12 @@
 import React from 'react';
+import { UserBasic, WithPassword } from '../app/types';
 
 import { Form, Input, Button } from 'antd';
 import { Link } from 'react-router-dom';
 import { useRedirectFromAuth } from '../features/auth/hooks';
 import { useAppSelector } from '../app/hooks';
 
-type Status = 'lecturer' | 'student';
-
-interface FormValues {
-  login: string;
-  password: string;
-  name: string;
-  status: Status;
-  faculty: string;
-}
+type FormValues = Pick<UserBasic, 'login'> & WithPassword;
 
 export const SignIn: React.FC = () => {
   const isLoading = useAppSelector((state) => state.auth.isSigningIn);

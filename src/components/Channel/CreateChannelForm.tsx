@@ -10,10 +10,7 @@ import {
   createChannel,
   creatorClosed,
 } from '../../features/channel/channelSlice';
-
-interface FormData {
-  name: string;
-}
+import { Channel } from '../../app/types';
 
 export const CreateChannelForm: React.FC = () => {
   const isOpened = useAppSelector((state) => state.channel.isCreatorOpened);
@@ -38,7 +35,9 @@ export const CreateChannelForm: React.FC = () => {
     form.submit();
   };
 
-  const submitHandler = (formData: FormData) => {
+  const submitHandler = (formData: Channel) => {
+    console.log(formData);
+
     dispatch(createChannel({ ...formData, photo: img }));
   };
 
@@ -85,6 +84,10 @@ export const CreateChannelForm: React.FC = () => {
             ]}
           >
             <Input placeholder="Назва каналу" />
+          </Form.Item>
+
+          <Form.Item name="description" initialValue={null}>
+            <Input placeholder="Опис каналу (не обов'язково)" />
           </Form.Item>
         </Form>
       </div>

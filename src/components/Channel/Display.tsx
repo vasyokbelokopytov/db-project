@@ -29,7 +29,7 @@ export const Display: React.FC = () => {
           <List.Item key={item.id} className="bg-white rounded-sm mb-2">
             <List.Item.Meta
               avatar={<Avatar size="large" icon={<UserOutlined />} />}
-              title={item.authorId}
+              title={item.author.login}
               description={item.text}
             />
           </List.Item>

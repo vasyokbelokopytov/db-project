@@ -1,12 +1,11 @@
-import { PostWithId } from './../../app/types';
-import { UserState } from './../user/userSlice';
+import { WithId } from './../../app/types';
 import { postsAPI } from './postsAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { Post } from '../../app/types';
 import { ChannelState } from '../channel/channelSlice';
 
 export interface PostsState {
-  posts: PostWithId[] | null;
+  posts: (Post & WithId)[] | null;
   total: number | null;
 
   isFetching: boolean;
@@ -38,18 +37,14 @@ export const fetchPosts = createAsyncThunk(
 export const sendPost = createAsyncThunk(
   'posts/postSended',
   async (text: string, { getState, dispatch, rejectWithValue }) => {
-    const state = getState() as { channel: ChannelState; user: UserState };
+    const state = getState() as { channel: ChannelState };
     const channelId = state.channel.channel?.id;
-    const authorId = state.user.user?.id;
 
-    if (channelId && authorId) {
-      const response = await postsAPI.create(
-        {
-          text,
-          authorId,
-        },
-        channelId
-      );
+    if (channelId) {
+      const response = await postsAPI.create({
+        text,
+        channelId,
+      });
 
       dispatch(postAdded(response.data));
       return response;

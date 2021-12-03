@@ -6,15 +6,8 @@ import {
   useAppSelector,
   useImageUpload,
 } from '../../app/hooks';
-import {
-  createChannel,
-  editChannel,
-  editorClosed,
-} from '../../features/channel/channelSlice';
-
-interface FormData {
-  name: string;
-}
+import { editChannel, editorClosed } from '../../features/channel/channelSlice';
+import { Channel } from '../../app/types';
 
 export const EditChannelForm: React.FC = () => {
   const channel = useAppSelector((state) => state.channel.channel);
@@ -34,7 +27,9 @@ export const EditChannelForm: React.FC = () => {
     form.submit();
   };
 
-  const submitHandler = (formData: FormData) => {
+  const submitHandler = (formData: Channel) => {
+    console.log(formData);
+
     if (channel) {
       dispatch(
         editChannel({
@@ -89,6 +84,10 @@ export const EditChannelForm: React.FC = () => {
             ]}
           >
             <Input placeholder="Назва каналу" />
+          </Form.Item>
+
+          <Form.Item name="description" initialValue={null}>
+            <Input placeholder="Опис каналу (не обов'язково)" />
           </Form.Item>
         </Form>
       </div>
