@@ -12,7 +12,7 @@ export const AsideChannel: React.FC<Props> = ({ channel }) => {
   return (
     <NavLink
       to={`channel/${channel.id}`}
-      className={({ isActive }) => (isActive ? 'bg-blue-200 rounded-lg' : '')}
+      className={({ isActive }) => (isActive ? 'bg-blue-100 rounded-lg' : '')}
     >
       <AsideChannelsItem>
         <Tooltip title={channel.name} placement="right">

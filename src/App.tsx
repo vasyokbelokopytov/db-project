@@ -55,6 +55,14 @@ export const App: React.FC = () => {
                 }
               />
               <Route
+                path="/chat/:userId"
+                element={
+                  <PrivateRoute>
+                    <EmptyMain />
+                  </PrivateRoute>
+                }
+              />
+              <Route
                 path="/settings"
                 element={
                   <PrivateRoute>

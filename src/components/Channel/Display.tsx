@@ -1,4 +1,5 @@
-import { Avatar } from 'antd';
+import { Avatar, ConfigProvider, Empty } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
 import React from 'react';
 import { List } from 'antd';
 import { useAppSelector } from '../../app/hooks';
@@ -6,18 +7,34 @@ import { useAppSelector } from '../../app/hooks';
 export const Display: React.FC = () => {
   const posts = useAppSelector((state) => state.posts.posts);
   return (
-    <List
-      className="flex-grow overflow-y-scroll"
-      dataSource={posts ?? undefined}
-      renderItem={(item) => (
-        <List.Item key={item.id} className="bg-white rounded-sm mb-2">
-          <List.Item.Meta
-            avatar={<Avatar />}
-            title={item.authorId}
-            description={item.text}
-          />
-        </List.Item>
+    <ConfigProvider
+      renderEmpty={() => (
+        <Empty
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description={
+            <span>
+              Канал наразі порожній.
+              <br /> Напишіть першим!
+            </span>
+          }
+        />
       )}
-    />
+    >
+      <List
+        className={`flex-grow overflow-y-scroll ${
+          !posts?.length && 'flex justify-center items-center'
+        }`}
+        dataSource={posts ?? undefined}
+        renderItem={(item) => (
+          <List.Item key={item.id} className="bg-white rounded-sm mb-2">
+            <List.Item.Meta
+              avatar={<Avatar size="large" icon={<UserOutlined />} />}
+              title={item.authorId}
+              description={item.text}
+            />
+          </List.Item>
+        )}
+      />
+    </ConfigProvider>
   );
 };
