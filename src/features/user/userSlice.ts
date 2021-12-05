@@ -33,7 +33,7 @@ export const fetchUser = createAsyncThunk(
   'user/fetched',
   async (id: number) => {
     const response = await userAPI.get(id);
-    return response;
+    return response.data;
   }
 );
 
@@ -41,7 +41,7 @@ export const updateUser = createAsyncThunk(
   'user/updated',
   async (userData: SettingsFormValues & WithPhoto) => {
     const response = await userAPI.update(userData);
-    return response;
+    return response.data;
   }
 );
 
@@ -49,7 +49,7 @@ export const fetchUserChannels = createAsyncThunk(
   'user/channels_fetched',
   async () => {
     const response = await userAPI.getChannels();
-    return response;
+    return response.data;
   }
 );
 
@@ -63,6 +63,14 @@ export const userSlice = createSlice({
 
     addChannel: (state, action) => {
       state.channels.push(action.payload);
+    },
+
+    userChanged: (state, action) => {
+      state.user = action.payload;
+    },
+
+    userChannelsChanged: (state, action) => {
+      state.channels = action.payload;
     },
   },
 
@@ -108,6 +116,7 @@ export const userSlice = createSlice({
   },
 });
 
-export const { toggleSettings, addChannel } = userSlice.actions;
+export const { toggleSettings, addChannel, userChanged, userChannelsChanged } =
+  userSlice.actions;
 
 export default userSlice.reducer;

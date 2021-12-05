@@ -3,7 +3,8 @@ import { Form, Input, Select, Button } from 'antd';
 import { Status, User, WithPassword } from '../app/types';
 import { Link } from 'react-router-dom';
 import { useRedirectFromAuth } from '../features/auth/hooks';
-import { useAppSelector } from '../app/hooks';
+import { useAppDispatch, useAppSelector, useErrorMessage } from '../app/hooks';
+import { signingUpErrorChanged, signUp } from '../features/auth/authSlice';
 
 const { Option } = Select;
 
@@ -11,6 +12,9 @@ type FormValues = User & WithPassword;
 
 export const SignUp: React.FC = () => {
   const isLoading = useAppSelector((state) => state.auth.isSigningUp);
+  const error = useAppSelector((state) => state.auth.signingUpError);
+  const dispatch = useAppDispatch();
+  useErrorMessage(error, signingUpErrorChanged);
   const [status, setStatus] = useState<Status | null>(null);
   useRedirectFromAuth();
 
@@ -19,7 +23,7 @@ export const SignUp: React.FC = () => {
   };
 
   const submitHandler = (values: FormValues) => {
-    console.log(values);
+    dispatch(signUp(values));
   };
 
   return (

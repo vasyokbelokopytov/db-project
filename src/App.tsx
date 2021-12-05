@@ -13,10 +13,14 @@ import { Settings } from './components/Settings';
 import { SignIn } from './components/SignIn';
 import { SignUp } from './components/SignUp';
 import { init } from './features/app/appSlice';
+import { authorize } from './features/auth/authSlice';
 import { PrivateRoute } from './features/auth/PrivateRoute';
+import { fetchUser, fetchUserChannels } from './features/user/userSlice';
 
 export const App: React.FC = () => {
+  const authId = useAppSelector((state) => state.auth.id);
   const isInit = useAppSelector((state) => state.app.isInit);
+  const isIniting = useAppSelector((state) => state.app.isIniting);
   const error = useAppSelector((state) => state.app.error);
 
   const dispatch = useAppDispatch();
@@ -27,59 +31,64 @@ export const App: React.FC = () => {
     }
   }, [dispatch, error, isInit]);
 
+  useEffect(() => {
+    if (authId) {
+      dispatch(fetchUser(authId));
+      dispatch(fetchUserChannels());
+    }
+  }, [authId, dispatch]);
+
   if (error) {
     return <InitError error={error} />;
   }
 
-  if (isInit) {
-    return (
-      <div className="box-border h-screen flex flex-col">
-        <Header />
-        <section className="flex-grow flex overflow-hidden">
-          <Routes>
-            <Route path="/" element={<Body />}>
-              <Route
-                index
-                element={
-                  <PrivateRoute>
-                    <EmptyMain />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/channel/:channelId"
-                element={
-                  <PrivateRoute>
-                    <Channel />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/chat/:userId"
-                element={
-                  <PrivateRoute>
-                    <EmptyMain />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/settings"
-                element={
-                  <PrivateRoute>
-                    <Settings />
-                  </PrivateRoute>
-                }
-              />
-              <Route path="*" element={<NotFound />} />
-            </Route>
-            <Route path="/sign-in" element={<SignIn />} />
-            <Route path="/sign-up" element={<SignUp />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </section>
-      </div>
-    );
-  }
+  if (isIniting) return <Init />;
 
-  return <Init />;
+  return (
+    <div className="box-border h-screen flex flex-col">
+      <Header />
+      <section className="flex-grow flex overflow-hidden">
+        <Routes>
+          <Route path="/" element={<Body />}>
+            <Route
+              index
+              element={
+                <PrivateRoute>
+                  <EmptyMain />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/channel/:channelId"
+              element={
+                <PrivateRoute>
+                  <Channel />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/chat/:userId"
+              element={
+                <PrivateRoute>
+                  <EmptyMain />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <PrivateRoute>
+                  <Settings />
+                </PrivateRoute>
+              }
+            />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+          <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/sign-up" element={<SignUp />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </section>
+    </div>
+  );
 };

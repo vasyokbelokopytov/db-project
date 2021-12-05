@@ -1,62 +1,26 @@
+import { template } from './../../app/api';
 import { AuthData, Response, User } from './../../app/types';
 import { SignInData } from './authSlice';
 
 export const authAPI = {
   authorize: () => {
-    return new Promise<Response<AuthData>>((res) => {
-      setTimeout(
-        () =>
-          res({
-            data: {
-              id: 23,
-            },
-            errors: [],
-          }),
-        1000
-      );
-    });
+    return template.get<Response<AuthData>>('session');
   },
 
   signIn: ({ login, password }: SignInData) => {
-    return new Promise<Response<AuthData>>((res) => {
-      setTimeout(
-        () =>
-          res({
-            data: {
-              id: 23,
-            },
-            errors: [],
-          }),
-        2000
-      );
+    return template.post<Response<AuthData>>('session', {
+      login,
+      password,
     });
   },
 
   signUp: (user: User) => {
-    return new Promise<Response<AuthData>>((res) => {
-      setTimeout(
-        () =>
-          res({
-            data: {
-              id: 23,
-            },
-            errors: [],
-          }),
-        2000
-      );
+    return template.post<Response<AuthData>>('user', {
+      ...user,
     });
   },
 
   signOut: () => {
-    return new Promise<Response<AuthData>>((res) => {
-      setTimeout(
-        () =>
-          res({
-            data: {},
-            errors: [],
-          }),
-        2000
-      );
-    });
+    return template.delete<Response<AuthData>>('session');
   },
 };

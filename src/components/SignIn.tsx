@@ -4,15 +4,21 @@ import { UserBasic, WithPassword } from '../app/types';
 import { Form, Input, Button } from 'antd';
 import { Link } from 'react-router-dom';
 import { useRedirectFromAuth } from '../features/auth/hooks';
-import { useAppSelector } from '../app/hooks';
+import { useAppSelector, useAppDispatch, useErrorMessage } from '../app/hooks';
+import { signIn, signingInErrorChanged } from '../features/auth/authSlice';
 
 type FormValues = Pick<UserBasic, 'login'> & WithPassword;
 
 export const SignIn: React.FC = () => {
   const isLoading = useAppSelector((state) => state.auth.isSigningIn);
+  const error = useAppSelector((state) => state.auth.signingInError);
+  const dispatch = useAppDispatch();
+
   useRedirectFromAuth();
+  useErrorMessage(error, signingInErrorChanged);
+
   const submitHandler = (values: FormValues) => {
-    console.log(values);
+    dispatch(signIn(values));
   };
 
   return (

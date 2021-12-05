@@ -1,59 +1,124 @@
+import { AuthData } from './../../app/types';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { User } from '../../app/types';
+import { User, Response } from '../../app/types';
 import { authAPI } from './authAPI';
+import { AxiosError } from 'axios';
+import { initChanged } from '../app/appSlice';
+import { userChanged, userChannelsChanged } from '../user/userSlice';
 
 export interface SignInData {
   login: string;
   password: string;
 }
 
-interface AuthState {
+export interface AuthState {
   id: number | null;
-  isAuthorizing: boolean;
-  isSigningIn: boolean;
-  isSigningUp: boolean;
-  isSigningOut: boolean;
 
-  error: null | string;
+  isAuthorizing: boolean;
+  authError: string | null;
+
+  isSigningIn: boolean;
+  signingInError: string | null;
+
+  isSigningUp: boolean;
+  signingUpError: string | null;
+
+  isSigningOut: boolean;
+  signingOutError: string | null;
 }
 
 const initialState: AuthState = {
   id: null,
-  isAuthorizing: false,
-  isSigningIn: false,
-  isSigningUp: false,
-  isSigningOut: false,
 
-  error: null,
+  isAuthorizing: true,
+  authError: null,
+
+  isSigningIn: false,
+  signingInError: null,
+
+  isSigningUp: false,
+  signingUpError: null,
+
+  isSigningOut: false,
+  signingOutError: null,
 };
 
 export const authorize = createAsyncThunk('auth/authorized', async () => {
   const response = await authAPI.authorize();
-  return response;
+  return response.data;
 });
 
-export const signIn = createAsyncThunk(
+export const signIn = createAsyncThunk<
+  Response<AuthData>,
+  SignInData,
+  {
+    rejectValue: string;
+  }
+>(
   'auth/signed_in',
-  async ({ login, password }: SignInData) => {
-    const response = await authAPI.signIn({ login, password });
-    return response;
+  async ({ login, password }: SignInData, { rejectWithValue, dispatch }) => {
+    try {
+      const response = await authAPI.signIn({ login, password });
+      if (response.data.errors[0]) {
+        return rejectWithValue(response.data.errors[0]);
+      }
+
+      return response.data;
+    } catch (e) {
+      const error = e as AxiosError;
+      if (error.response && error.response.status === 401) {
+        return rejectWithValue(error.response.data.errors[0]);
+      }
+      return rejectWithValue(error.message);
+    }
   }
 );
 
-export const signUp = createAsyncThunk('auth/signed_up', async (user: User) => {
-  const response = await authAPI.signUp(user);
-  return response;
+export const signUp = createAsyncThunk<
+  Response<AuthData>,
+  User,
+  {
+    rejectValue: string;
+  }
+>('auth/signed_up', async (user: User, { rejectWithValue }) => {
+  try {
+    const response = await authAPI.signUp(user);
+    return response.data;
+  } catch (e) {
+    const error = e as AxiosError;
+    const statuses = [400, 401, 409];
+
+    if (error.response?.status && statuses.includes(error.response.status)) {
+      return rejectWithValue(error.response.data.errors[0]);
+    } else {
+      return rejectWithValue(error.message);
+    }
+  }
 });
 
-export const signOut = createAsyncThunk('auth/signed_out', async () => {
-  const response = await authAPI.signOut();
-  return response;
-});
+export const signOut = createAsyncThunk(
+  'auth/signed_out',
+  async (_, { dispatch }) => {
+    const response = await authAPI.signOut();
+    if (!response.data.errors.length) {
+      dispatch(userChanged(null));
+      dispatch(userChannelsChanged([]));
+    }
+    return response.data;
+  }
+);
 
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
-  reducers: {},
+  reducers: {
+    signingInErrorChanged: (state, action) => {
+      state.signingInError = action.payload;
+    },
+    signingUpErrorChanged: (state, action) => {
+      state.signingUpError = action.payload;
+    },
+  },
 
   extraReducers: (builder) => {
     builder
@@ -67,7 +132,7 @@ export const authSlice = createSlice({
         }
       })
       .addCase(authorize.rejected, (state, action) => {
-        state.error = action.error.message ?? null;
+        state.authError = action.error.message ?? null;
         state.isAuthorizing = false;
       })
 
@@ -76,12 +141,12 @@ export const authSlice = createSlice({
       })
       .addCase(signIn.fulfilled, (state, action) => {
         state.isSigningIn = false;
-        if (!action.payload.errors.length && action.payload.data.id) {
+        if (action.payload.data.id) {
           state.id = action.payload.data.id;
         }
       })
       .addCase(signIn.rejected, (state, action) => {
-        state.error = action.error.message ?? null;
+        state.signingInError = action.payload ?? null;
         state.isSigningIn = false;
       })
 
@@ -95,7 +160,7 @@ export const authSlice = createSlice({
         }
       })
       .addCase(signUp.rejected, (state, action) => {
-        state.error = action.error.message ?? null;
+        state.signingUpError = action.payload ?? null;
         state.isSigningUp = false;
       })
 
@@ -107,10 +172,13 @@ export const authSlice = createSlice({
         state.id = null;
       })
       .addCase(signOut.rejected, (state, action) => {
-        state.error = action.error.message ?? null;
+        state.signingOutError = action.error.message ?? null;
         state.isSigningOut = false;
       });
   },
 });
+
+export const { signingInErrorChanged, signingUpErrorChanged } =
+  authSlice.actions;
 
 export default authSlice.reducer;

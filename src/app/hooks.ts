@@ -1,7 +1,8 @@
+import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { UploadRequestOption } from 'rc-upload/lib/interface';
 import { UploadFile } from 'antd/lib/upload/interface';
 import { UploadChangeParam, RcFile } from 'antd/lib/upload';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import type { RootState, AppDispatch } from './store';
 import { message } from 'antd';
@@ -58,4 +59,19 @@ export const useImageUpload = (url: any) => {
     beforeUpload,
     dummyRequest,
   };
+};
+
+export const useErrorMessage = (
+  error: string | null,
+  removeAction?: ActionCreatorWithPayload<null | string>
+) => {
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    if (error) {
+      message.error(error);
+      if (removeAction) {
+        dispatch(removeAction(null));
+      }
+    }
+  }, [error, dispatch, removeAction]);
 };
