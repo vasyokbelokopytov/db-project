@@ -15,34 +15,37 @@ import { SignUp } from './components/SignUp';
 import { init } from './features/app/appSlice';
 import { authorize } from './features/auth/authSlice';
 import { PrivateRoute } from './features/auth/PrivateRoute';
-import { fetchUser, fetchUserChannels } from './features/user/userSlice';
 
 export const App: React.FC = () => {
   const authId = useAppSelector((state) => state.auth.id);
   const isInit = useAppSelector((state) => state.app.isInit);
   const isIniting = useAppSelector((state) => state.app.isIniting);
-  const error = useAppSelector((state) => state.app.error);
+  const isAuthorizing = useAppSelector((state) => state.auth.isAuthorizing);
+  const initError = useAppSelector((state) => state.app.error);
+  const authError = useAppSelector((state) => state.auth.authError);
+
+  const error = initError ?? authError;
+  const isLoading = isIniting || isAuthorizing;
 
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    if (!isInit && !error) {
-      dispatch(init());
+    if (!isInit && !initError) {
+      dispatch(authorize());
     }
-  }, [dispatch, error, isInit]);
+  }, [dispatch, initError, isInit]);
 
   useEffect(() => {
     if (authId) {
-      dispatch(fetchUser(authId));
-      dispatch(fetchUserChannels());
+      dispatch(init(authId));
     }
   }, [authId, dispatch]);
 
   if (error) {
-    return <InitError error={error} />;
+    return <InitError error={error} loading={isLoading} />;
   }
 
-  if (isIniting) return <Init />;
+  if (isLoading && !error) return <Init />;
 
   return (
     <div className="box-border h-screen flex flex-col">

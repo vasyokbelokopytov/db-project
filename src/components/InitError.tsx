@@ -6,9 +6,10 @@ import { authorize } from '../features/auth/authSlice';
 
 interface Props {
   error: string | null;
+  loading: boolean;
 }
 
-export const InitError: React.FC<Props> = ({ error }) => {
+export const InitError: React.FC<Props> = ({ error, loading }) => {
   const dispatch = useAppDispatch();
 
   const clickHandler = () => {
@@ -22,7 +23,7 @@ export const InitError: React.FC<Props> = ({ error }) => {
         title="Виникла помилка під час завантаження додатку"
         subTitle={error}
         extra={
-          <Button type="primary" onClick={clickHandler}>
+          <Button type="primary" onClick={clickHandler} loading={loading}>
             Спробувати ще раз
           </Button>
         }

@@ -1,5 +1,4 @@
-import { fetchUser, fetchUserChannels } from './../user/userSlice';
-import { authorize, AuthState } from './../auth/authSlice';
+import { fetchUser, fetchUserChannels, UserState } from './../user/userSlice';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 interface AppState {
@@ -14,16 +13,21 @@ const initialState: AppState = {
   error: null,
 };
 
-export const init = createAsyncThunk('app/init', async (_, { dispatch }) => {
-  const authResponse = await dispatch(authorize()).unwrap();
-
-  if (authResponse.data.id && !authResponse.errors.length) {
+export const init = createAsyncThunk(
+  'app/init',
+  async (id: number, { dispatch, getState }) => {
+    const state = getState() as { user: UserState };
     return await Promise.all([
-      dispatch(fetchUser(authResponse.data.id)),
-      dispatch(fetchUserChannels()),
+      dispatch(fetchUser(id)),
+      dispatch(
+        fetchUserChannels({
+          portion: state.user.lastPortion + 1,
+          count: state.user.count,
+        })
+      ),
     ]);
   }
-});
+);
 
 const appSlice = createSlice({
   name: 'app',
@@ -36,12 +40,12 @@ const appSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(init.pending, (state) => {
-        state.error = null;
         state.isIniting = true;
       })
       .addCase(init.fulfilled, (state) => {
         state.isIniting = false;
         state.isInit = true;
+        state.error = null;
       })
       .addCase(init.rejected, (state, action) => {
         state.isIniting = false;

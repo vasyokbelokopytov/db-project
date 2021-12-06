@@ -75,3 +75,30 @@ export const useErrorMessage = (
     }
   }, [error, dispatch, removeAction]);
 };
+
+export const useSuccessMessage = (
+  msg: string,
+  isSucceed: boolean,
+  removeAction?: ActionCreatorWithPayload<null | string>
+) => {
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    if (isSucceed) {
+      message.success(msg);
+      if (removeAction) {
+        dispatch(removeAction(null));
+      }
+    }
+  }, [isSucceed, dispatch, removeAction, msg]);
+};
+
+export const useLoading = (msg: string, isLoading: boolean) => {
+  useEffect(() => {
+    let hide = () => {};
+    if (isLoading) {
+      hide = message.loading(msg);
+    } else {
+      hide();
+    }
+  }, [isLoading, msg]);
+};

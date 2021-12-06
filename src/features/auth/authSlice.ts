@@ -45,6 +45,7 @@ const initialState: AuthState = {
 
 export const authorize = createAsyncThunk('auth/authorized', async () => {
   const response = await authAPI.authorize();
+
   return response.data;
 });
 
@@ -86,7 +87,7 @@ export const signUp = createAsyncThunk<
     return response.data;
   } catch (e) {
     const error = e as AxiosError;
-    const statuses = [400, 401, 409];
+    const statuses = [400, 404, 409];
 
     if (error.response?.status && statuses.includes(error.response.status)) {
       return rejectWithValue(error.response.data.errors[0]);
@@ -118,15 +119,21 @@ export const authSlice = createSlice({
     signingUpErrorChanged: (state, action) => {
       state.signingUpError = action.payload;
     },
+
+    signingOutErrorChanged: (state, action) => {
+      state.signingOutError = action.payload;
+    },
   },
 
   extraReducers: (builder) => {
     builder
       .addCase(authorize.pending, (state) => {
         state.isAuthorizing = true;
+        state.id = null;
       })
       .addCase(authorize.fulfilled, (state, action) => {
         state.isAuthorizing = false;
+        state.authError = null;
         if (!action.payload.errors.length && action.payload.data.id) {
           state.id = action.payload.data.id;
         }
@@ -178,7 +185,10 @@ export const authSlice = createSlice({
   },
 });
 
-export const { signingInErrorChanged, signingUpErrorChanged } =
-  authSlice.actions;
+export const {
+  signingInErrorChanged,
+  signingUpErrorChanged,
+  signingOutErrorChanged,
+} = authSlice.actions;
 
 export default authSlice.reducer;

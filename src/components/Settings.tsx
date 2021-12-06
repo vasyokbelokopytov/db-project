@@ -1,10 +1,19 @@
 import React from 'react';
 import { Form, Input, Button, Upload, Avatar, Space } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
-import { useAppSelector, useImageUpload } from '../app/hooks';
+import {
+  useAppSelector,
+  useErrorMessage,
+  useImageUpload,
+  useSuccessMessage,
+} from '../app/hooks';
 import { useDispatch } from 'react-redux';
-import { updateUser } from '../features/user/userSlice';
-import { signOut } from '../features/auth/authSlice';
+import {
+  updateSucceedChanged,
+  updateUser,
+  updatingErrorChanged,
+} from '../features/user/userSlice';
+import { signingOutErrorChanged, signOut } from '../features/auth/authSlice';
 
 export interface SettingsFormValues {
   name: string;
@@ -14,7 +23,14 @@ export interface SettingsFormValues {
 
 export const Settings: React.FC = () => {
   const user = useAppSelector((state) => state.user.user);
-  const isLoading = useAppSelector((state) => state.user.isUserUpdating);
+  const isUpdating = useAppSelector((state) => state.user.isUpdating);
+  const updateSucceed = useAppSelector((state) => state.user.updateSucceed);
+  const updatingError = useAppSelector((state) => state.user.updatingError);
+  const signingOutError = useAppSelector((state) => state.auth.signingOutError);
+
+  useErrorMessage(signingOutError, signingOutErrorChanged);
+  useErrorMessage(updatingError, updatingErrorChanged);
+  useSuccessMessage('Зміни застосовані', updateSucceed, updateSucceedChanged);
 
   const dispatch = useDispatch();
   const { img, handleChange, beforeUpload, dummyRequest } = useImageUpload(
@@ -22,6 +38,8 @@ export const Settings: React.FC = () => {
   );
 
   const submitHandler = (values: SettingsFormValues) => {
+    console.log(values);
+
     dispatch(updateUser({ ...values, photo: img }));
   };
 
@@ -87,7 +105,7 @@ export const Settings: React.FC = () => {
 
           <Form.Item>
             <Space>
-              <Button type="primary" htmlType="submit" loading={isLoading}>
+              <Button type="primary" htmlType="submit" loading={isUpdating}>
                 Застосувати зміни
               </Button>
 

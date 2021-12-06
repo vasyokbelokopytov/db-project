@@ -61,8 +61,3 @@ export type ItemsResponse<T> = Response<ItemsData<T>>;
 export interface AuthData {
   id?: number;
 }
-
-export interface ChannelsPreviewData {
-  items: ChannelPreview[];
-  total: number | null;
-}

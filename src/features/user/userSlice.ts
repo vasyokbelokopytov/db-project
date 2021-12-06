@@ -1,55 +1,134 @@
+import { AxiosError } from 'axios';
 import { SettingsFormValues } from './../../components/Settings';
 import { userAPI } from './userAPI';
-import { User, ChannelPreview, WithId, WithPhoto } from './../../app/types';
+import {
+  User,
+  ChannelPreview,
+  WithId,
+  WithPhoto,
+  Response,
+  ItemsResponse,
+} from './../../app/types';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 export interface UserState {
   user: (User & WithId & WithPhoto) | null;
-  isUserFetching: boolean;
-  isUserUpdating: boolean;
+  isFetching: boolean;
+  fetchingError: string | null;
+
+  isUpdating: boolean;
+  updateSucceed: boolean;
+  updatingError: string | null;
 
   channels: ChannelPreview[];
+  count: number;
+  lastPortion: number;
+  total: number | null;
+
   isChannelsFetching: boolean;
-
-  isSettingsOpened: boolean;
-
-  error: null | string;
+  channelsFetchingError: string | null;
 }
 
 const initialState: UserState = {
   user: null,
-  isUserFetching: true,
-  isUserUpdating: false,
+  isFetching: false,
+  fetchingError: null,
+
+  isUpdating: false,
+  updateSucceed: false,
+  updatingError: null,
 
   channels: [],
+  count: 10,
+  lastPortion: 0,
+  total: null,
   isChannelsFetching: false,
-
-  isSettingsOpened: false,
-
-  error: null,
+  channelsFetchingError: null,
 };
 
-export const fetchUser = createAsyncThunk(
-  'user/fetched',
-  async (id: number) => {
+export const fetchUser = createAsyncThunk<
+  Response<User & WithId & WithPhoto>,
+  number,
+  {
+    rejectValue: string;
+  }
+>('user/fetched', async (id: number, { rejectWithValue }) => {
+  try {
     const response = await userAPI.get(id);
-    return response.data;
-  }
-);
+    if (response.data.errors[0]) {
+      return rejectWithValue(response.data.errors[0]);
+    }
 
-export const updateUser = createAsyncThunk(
+    return response.data;
+  } catch (e) {
+    const error = e as AxiosError;
+    if (error.response && error.response.status === 401) {
+      return rejectWithValue(error.response.data.errors[0]);
+    }
+    return rejectWithValue(error.message);
+  }
+});
+
+export const updateUser = createAsyncThunk<
+  User & WithPhoto & WithId,
+  SettingsFormValues & WithPhoto,
+  {
+    rejectValue: string;
+  }
+>(
   'user/updated',
-  async (userData: SettingsFormValues & WithPhoto) => {
-    const response = await userAPI.update(userData);
-    return response.data;
+  async (
+    userData: SettingsFormValues & WithPhoto,
+    { rejectWithValue, getState }
+  ) => {
+    const state = getState() as { user: UserState };
+
+    try {
+      const response = await userAPI.update(userData);
+      if (response.data.errors[0]) {
+        return rejectWithValue(response.data.errors[0]);
+      }
+
+      return {
+        ...state.user.user,
+        ...userData,
+      } as User & WithPhoto & WithId;
+    } catch (e) {
+      const error = e as AxiosError;
+      if (error.response && error.response.status === 401) {
+        return rejectWithValue(error.response.data.errors[0]);
+      }
+      return rejectWithValue(error.message);
+    }
   }
 );
 
-export const fetchUserChannels = createAsyncThunk(
+export const fetchUserChannels = createAsyncThunk<
+  ItemsResponse<ChannelPreview[]>,
+  { portion: number; count: number },
+  {
+    rejectValue: string;
+  }
+>(
   'user/channels_fetched',
-  async () => {
-    const response = await userAPI.getChannels();
-    return response.data;
+  async (
+    { portion, count }: { portion: number; count: number },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await userAPI.getChannels(portion, count);
+      if (response.data.errors[0]) {
+        return rejectWithValue(response.data.errors[0]);
+      }
+
+      return response.data;
+    } catch (e) {
+      const error = e as AxiosError;
+      if (error.response && error.response.status === 401) {
+        return rejectWithValue(error.response.data.errors[0]);
+      }
+      return rejectWithValue(error.message);
+    }
   }
 );
 
@@ -57,10 +136,6 @@ export const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    toggleSettings: (state) => {
-      state.isSettingsOpened = !state.isSettingsOpened;
-    },
-
     addChannel: (state, action) => {
       state.channels.push(action.payload);
     },
@@ -72,34 +147,45 @@ export const userSlice = createSlice({
     userChannelsChanged: (state, action) => {
       state.channels = action.payload;
     },
+
+    channelsFetchingErrorChanged: (state, action) => {
+      state.channelsFetchingError = action.payload;
+    },
+
+    updateSucceedChanged: (state, action) => {
+      state.updateSucceed = action.payload;
+    },
+
+    updatingErrorChanged: (state, action) => {
+      state.updatingError = action.payload;
+    },
   },
 
   extraReducers: (builder) => {
     builder
       .addCase(fetchUser.pending, (state) => {
-        state.isUserFetching = true;
+        state.isFetching = true;
       })
       .addCase(fetchUser.fulfilled, (state, action) => {
-        state.isUserFetching = false;
+        state.isFetching = false;
         state.user = action.payload.data;
       })
       .addCase(fetchUser.rejected, (state, action) => {
-        state.error = action.error.message ?? null;
-        state.isUserFetching = false;
+        state.fetchingError = action.error.message ?? null;
+        state.isFetching = false;
       })
 
       .addCase(updateUser.pending, (state) => {
-        state.isUserUpdating = true;
+        state.isUpdating = true;
       })
       .addCase(updateUser.fulfilled, (state, action) => {
-        state.isUserUpdating = false;
-        if (state.user) {
-          state.user = action.payload.data;
-        }
+        state.isUpdating = false;
+        state.updateSucceed = true;
+        state.user = action.payload;
       })
       .addCase(updateUser.rejected, (state, action) => {
-        state.error = action.error.message ?? null;
-        state.isUserUpdating = false;
+        state.updatingError = action.error.message ?? null;
+        state.isUpdating = false;
       })
 
       .addCase(fetchUserChannels.pending, (state) => {
@@ -108,15 +194,24 @@ export const userSlice = createSlice({
       .addCase(fetchUserChannels.fulfilled, (state, action) => {
         state.isChannelsFetching = false;
         state.channels = [...state.channels, ...action.payload.data.items];
+        state.lastPortion += 1;
+
+        state.total = action.payload.data.total;
       })
       .addCase(fetchUserChannels.rejected, (state, action) => {
-        state.error = action.error.message ?? null;
+        state.channelsFetchingError = action.error.message ?? null;
         state.isChannelsFetching = false;
       });
   },
 });
 
-export const { toggleSettings, addChannel, userChanged, userChannelsChanged } =
-  userSlice.actions;
+export const {
+  addChannel,
+  userChanged,
+  userChannelsChanged,
+  updateSucceedChanged,
+  updatingErrorChanged,
+  channelsFetchingErrorChanged,
+} = userSlice.actions;
 
 export default userSlice.reducer;
