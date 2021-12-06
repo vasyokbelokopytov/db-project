@@ -3,7 +3,6 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { User, Response } from '../../app/types';
 import { authAPI } from './authAPI';
 import { AxiosError } from 'axios';
-import { initChanged } from '../app/appSlice';
 import { userChanged, userChannelsChanged } from '../user/userSlice';
 
 export interface SignInData {
@@ -57,7 +56,7 @@ export const signIn = createAsyncThunk<
   }
 >(
   'auth/signed_in',
-  async ({ login, password }: SignInData, { rejectWithValue, dispatch }) => {
+  async ({ login, password }: SignInData, { rejectWithValue }) => {
     try {
       const response = await authAPI.signIn({ login, password });
       if (response.data.errors[0]) {
@@ -70,7 +69,9 @@ export const signIn = createAsyncThunk<
       if (error.response && error.response.status === 401) {
         return rejectWithValue(error.response.data.errors[0]);
       }
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        error.response?.statusText ?? 'Some error occured'
+      );
     }
   }
 );
@@ -92,7 +93,9 @@ export const signUp = createAsyncThunk<
     if (error.response?.status && statuses.includes(error.response.status)) {
       return rejectWithValue(error.response.data.errors[0]);
     } else {
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        error.response?.statusText ?? 'Some error occured'
+      );
     }
   }
 });

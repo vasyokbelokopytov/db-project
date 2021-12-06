@@ -61,3 +61,11 @@ export type ItemsResponse<T> = Response<ItemsData<T>>;
 export interface AuthData {
   id?: number;
 }
+
+export interface ChannelCreatedData {
+  id: number;
+}
+
+export interface PostCreatedData {
+  id: number;
+}

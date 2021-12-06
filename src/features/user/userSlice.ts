@@ -65,7 +65,7 @@ export const fetchUser = createAsyncThunk<
     if (error.response && error.response.status === 401) {
       return rejectWithValue(error.response.data.errors[0]);
     }
-    return rejectWithValue(error.message);
+    return rejectWithValue(error.response?.statusText ?? 'Some error occured');
   }
 });
 
@@ -98,7 +98,9 @@ export const updateUser = createAsyncThunk<
       if (error.response && error.response.status === 401) {
         return rejectWithValue(error.response.data.errors[0]);
       }
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        error.response?.statusText ?? 'Some error occured'
+      );
     }
   }
 );
@@ -127,7 +129,9 @@ export const fetchUserChannels = createAsyncThunk<
       if (error.response && error.response.status === 401) {
         return rejectWithValue(error.response.data.errors[0]);
       }
-      return rejectWithValue(error.message);
+      return rejectWithValue(
+        error.response?.statusText ?? 'Some error occured'
+      );
     }
   }
 );
@@ -171,7 +175,7 @@ export const userSlice = createSlice({
         state.user = action.payload.data;
       })
       .addCase(fetchUser.rejected, (state, action) => {
-        state.fetchingError = action.error.message ?? null;
+        state.fetchingError = action.payload ?? null;
         state.isFetching = false;
       })
 
@@ -184,7 +188,7 @@ export const userSlice = createSlice({
         state.user = action.payload;
       })
       .addCase(updateUser.rejected, (state, action) => {
-        state.updatingError = action.error.message ?? null;
+        state.updatingError = action.payload ?? null;
         state.isUpdating = false;
       })
 
@@ -199,7 +203,7 @@ export const userSlice = createSlice({
         state.total = action.payload.data.total;
       })
       .addCase(fetchUserChannels.rejected, (state, action) => {
-        state.channelsFetchingError = action.error.message ?? null;
+        state.channelsFetchingError = action.payload ?? null;
         state.isChannelsFetching = false;
       });
   },

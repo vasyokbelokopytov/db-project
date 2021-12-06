@@ -2,10 +2,11 @@ import { Avatar, ConfigProvider, Empty } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import React from 'react';
 import { List } from 'antd';
-import { useAppSelector } from '../../app/hooks';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
 
 export const Display: React.FC = () => {
-  const posts = useAppSelector((state) => state.posts.posts);
+  const posts = useAppSelector((state) => state.channel.posts);
+
   return (
     <ConfigProvider
       renderEmpty={() => (
@@ -28,8 +29,14 @@ export const Display: React.FC = () => {
         renderItem={(item) => (
           <List.Item key={item.id} className="bg-white rounded-sm mb-2">
             <List.Item.Meta
-              avatar={<Avatar size="large" icon={<UserOutlined />} />}
-              title={item.author.login}
+              avatar={
+                <Avatar
+                  size="large"
+                  icon={<UserOutlined />}
+                  src={item.author.photo}
+                />
+              }
+              title={item.author.name}
               description={item.text}
             />
           </List.Item>

@@ -1,23 +1,41 @@
 import { Modal, Form, Input, Upload, Avatar } from 'antd';
 import { MessageOutlined } from '@ant-design/icons';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   useAppDispatch,
   useAppSelector,
+  useErrorMessage,
   useImageUpload,
+  useSuccessMessage,
 } from '../../app/hooks';
-import { editChannel, editorClosed } from '../../features/channel/channelSlice';
+import {
+  editChannel,
+  editedSucceedChanged,
+  editorClosed,
+} from '../../features/channel/channelSlice';
 import { Channel } from '../../app/types';
 
 export const EditChannelForm: React.FC = () => {
   const channel = useAppSelector((state) => state.channel.channel);
   const isOpened = useAppSelector((state) => state.channel.isEditorOpened);
   const isLoading = useAppSelector((state) => state.channel.isEditing);
+  const error = useAppSelector((state) => state.channel.editingError);
+  const succeed = useAppSelector((state) => state.channel.editedSucceed);
 
   const { img, setImg, dummyRequest, beforeUpload, handleChange } =
     useImageUpload(channel ? channel.photo : null);
   const [form] = Form.useForm();
   const dispatch = useAppDispatch();
+
+  useErrorMessage(error, editedSucceedChanged);
+  useSuccessMessage('Інформацію змінено', succeed, editedSucceedChanged);
+
+  useEffect(() => {
+    if (isOpened) {
+      form.resetFields();
+      setImg(channel ? channel.photo : null);
+    }
+  }, [isOpened, form, setImg, channel]);
 
   const close = () => {
     dispatch(editorClosed());
@@ -75,6 +93,7 @@ export const EditChannelForm: React.FC = () => {
         >
           <Form.Item
             name="name"
+            initialValue={channel ? channel.name : ''}
             rules={[
               {
                 required: true,
@@ -86,7 +105,10 @@ export const EditChannelForm: React.FC = () => {
             <Input placeholder="Назва каналу" />
           </Form.Item>
 
-          <Form.Item name="description" initialValue={null}>
+          <Form.Item
+            name="description"
+            initialValue={channel ? channel.description : ''}
+          >
             <Input placeholder="Опис каналу (не обов'язково)" />
           </Form.Item>
         </Form>

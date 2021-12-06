@@ -5,20 +5,31 @@ import {
   useAppDispatch,
   useAppSelector,
   useImageUpload,
+  useErrorMessage,
+  useSuccessMessage,
 } from '../../app/hooks';
 import {
   createChannel,
   creatorClosed,
+  creationErrorChanged,
+  createdSucceedChanged,
 } from '../../features/channel/channelSlice';
 import { Channel } from '../../app/types';
 
 export const CreateChannelForm: React.FC = () => {
   const isOpened = useAppSelector((state) => state.channel.isCreatorOpened);
   const isLoading = useAppSelector((state) => state.channel.isCreating);
+  const succeed = useAppSelector((state) => state.channel.createdSucceed);
+  const error = useAppSelector((state) => state.channel.creationError);
+
   const { img, setImg, dummyRequest, beforeUpload, handleChange } =
     useImageUpload(null);
   const [form] = Form.useForm();
+
   const dispatch = useAppDispatch();
+
+  useErrorMessage(error, creationErrorChanged);
+  useSuccessMessage('Канал створено', succeed, createdSucceedChanged);
 
   useEffect(() => {
     if (isOpened) {

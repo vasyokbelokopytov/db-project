@@ -1,4 +1,4 @@
-import { Card, Spin, Typography } from 'antd';
+import { Button, Card, Result, Spin, Typography } from 'antd';
 
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router';
@@ -6,36 +6,41 @@ import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import {
   editorOpened,
   fetchChannel,
+  postsChanged,
 } from '../../features/channel/channelSlice';
 import { Display } from './Display';
 import { Field } from './Field';
 
 export const Channel: React.FC = () => {
   const channel = useAppSelector((state) => state.channel.channel);
-  const isLoading = useAppSelector((state) => state.channel.isFetching);
-  const error = useAppSelector((state) => state.channel.error);
+  const isFetching = useAppSelector((state) => state.channel.isFetching);
+  const fetchingError = useAppSelector((state) => state.channel.fetchingError);
 
   const dispatch = useAppDispatch();
 
   const params = useParams();
 
   useEffect(() => {
-    if (params.channelId) {
+    if (
+      params.channelId &&
+      (channel === null || +params.channelId !== channel.id)
+    ) {
+      dispatch(postsChanged(null));
       dispatch(fetchChannel(+params.channelId));
     }
-  }, [params, dispatch]);
+  }, [params.channelId, channel, dispatch]);
 
   const openEditor = () => {
     dispatch(editorOpened());
   };
 
-  if (isLoading) return <Spin />;
+  const clickHandler = () => {
+    if (params.channelId) {
+      dispatch(fetchChannel(+params.channelId));
+    }
+  };
 
-  if (!params.channelId) {
-    return <div className="">404</div>;
-  }
-
-  if (channel)
+  if (channel && !fetchingError && !isFetching)
     return (
       <Card
         title={channel.name}
@@ -53,5 +58,30 @@ export const Channel: React.FC = () => {
       </Card>
     );
 
-  return <div>{error}</div>;
+  return (
+    <Card
+      className="w-full h-full flex flex-col"
+      bodyStyle={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        overflowY: 'hidden',
+        height: '100%',
+      }}
+    >
+      {isFetching && !fetchingError && <Spin />}
+      {fetchingError && (
+        <Result
+          status="warning"
+          title="Виникла помилка під час завантаження каналу"
+          subTitle={fetchingError}
+          extra={
+            <Button type="primary" onClick={clickHandler} loading={isFetching}>
+              Спробувати ще раз
+            </Button>
+          }
+        />
+      )}
+    </Card>
+  );
 };

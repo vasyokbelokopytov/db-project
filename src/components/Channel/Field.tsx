@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { fetchChannel } from '../../features/channel/channelSlice';
-import { sendPost } from '../../features/posts/postsSlice';
+import { sendPost } from '../../features/post/postSlice';
 
 const { TextArea } = Input;
 

@@ -1,52 +1,45 @@
-import { Response, Channel, WithId, WithPhoto } from './../../app/types';
+import { template } from '../../app/api';
+import {
+  Response,
+  Channel,
+  WithId,
+  WithPhoto,
+  ChannelCreatedData,
+  ItemsResponse,
+  Post,
+} from './../../app/types';
 
 export const channelAPI = {
   get: (id: number) => {
-    return new Promise<Response<Channel & WithId & WithPhoto>>((res) => {
-      setTimeout(
-        () =>
-          res({
-            data: {
-              id,
-              name: 'kpi',
-              description: 'about',
-              photo: null,
-            },
-            errors: [],
-          }),
-        1000
-      );
-    });
+    return template.get<Response<Channel & WithId & WithPhoto>>(
+      `channel/${id}`
+    );
   },
 
   create: (channel: Channel & WithPhoto) => {
-    return new Promise<Response<Channel & WithId & WithPhoto>>((res) => {
-      setTimeout(
-        () =>
-          res({
-            data: { id: Math.random(), ...channel },
-            errors: [],
-          }),
-        1000
-      );
+    return template.post<Response<ChannelCreatedData>>('channel', {
+      ...channel,
     });
   },
 
-  update: (channel: Partial<Channel & WithPhoto>) => {
-    return new Promise<Response<Channel & WithId & WithPhoto>>((res) => {
-      setTimeout(
-        () =>
-          res({
-            data: {
-              id: 4,
-              name: 'updated',
-              description: 'about',
-              photo: null,
-            },
-            errors: [],
-          }),
-        1000
-      );
-    });
+  update: (channel: Channel & WithId & WithPhoto) => {
+    return template.put<Response<Channel & WithId & WithPhoto>>(
+      `channel/${channel.id}`,
+      { ...channel }
+    );
+  },
+
+  getPosts: ({
+    id,
+    page,
+    count,
+  }: {
+    id: number;
+    page: number;
+    count: number;
+  }) => {
+    return template.get<ItemsResponse<(Post & WithId)[]>>(
+      `channel/${id}/posts?page=${page}&count=${count}`
+    );
   },
 };

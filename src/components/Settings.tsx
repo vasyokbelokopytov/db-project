@@ -38,8 +38,6 @@ export const Settings: React.FC = () => {
   );
 
   const submitHandler = (values: SettingsFormValues) => {
-    console.log(values);
-
     dispatch(updateUser({ ...values, photo: img }));
   };
 
