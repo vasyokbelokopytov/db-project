@@ -2,7 +2,7 @@ import { Avatar, ConfigProvider, Empty } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import React from 'react';
 import { List } from 'antd';
-import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import { useAppSelector } from '../../app/hooks';
 
 export const Display: React.FC = () => {
   const posts = useAppSelector((state) => state.channel.posts);

@@ -3,6 +3,7 @@ import authReducer from '../features/auth/authSlice';
 import userReducer from '../features/user/userSlice';
 import channelReducer from '../features/channel/channelSlice';
 import postReducer from '../features/post/postSlice';
+import searchReducer from '../features/search/searchSlice';
 
 import appReducer from '../features/app/appSlice';
 
@@ -13,6 +14,7 @@ export const store = configureStore({
     channel: channelReducer,
     post: postReducer,
     app: appReducer,
+    search: searchReducer,
   },
 });
 

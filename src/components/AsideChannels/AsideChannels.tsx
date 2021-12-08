@@ -1,5 +1,7 @@
 import React, { UIEvent } from 'react';
 
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
+
 import { AsideChannel } from './AsideChannel';
 import { AsideButton } from './AsideButton';
 import {
@@ -12,9 +14,12 @@ import {
   channelsFetchingErrorChanged,
   fetchUserChannels,
 } from '../../features/user/userSlice';
+import { creatorOpened } from '../../features/channel/channelSlice';
+import { useNavigate } from 'react-router';
 
 export const AsideChannels: React.FC = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const channels = useAppSelector((state) => state.user.channels);
   const total = useAppSelector((state) => state.user.total);
   const count = useAppSelector((state) => state.user.count);
@@ -39,12 +44,17 @@ export const AsideChannels: React.FC = () => {
     }
   };
 
+  const openForm = () => {
+    dispatch(creatorOpened());
+  };
+
   return (
     <aside
       className="flex flex-col items-center bg-gray-100 overflow-y-scroll"
       onScroll={scrollHandler}
     >
-      <AsideButton />
+      <AsideButton Icon={SearchOutlined} onClick={() => navigate('/search')} />
+      <AsideButton Icon={PlusOutlined} onClick={openForm} />
 
       {channels
         .map((channel) => <AsideChannel key={channel.id} channel={channel} />)

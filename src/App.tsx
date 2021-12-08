@@ -9,6 +9,7 @@ import { Header } from './components/Header/Header';
 import { Init } from './components/Init';
 import { InitError } from './components/InitError';
 import { NotFound } from './components/NotFound';
+import { Search } from './components/Search/Search';
 import { Settings } from './components/Settings';
 import { SignIn } from './components/SignIn';
 import { SignUp } from './components/SignUp';
@@ -82,6 +83,14 @@ export const App: React.FC = () => {
               element={
                 <PrivateRoute>
                   <Settings />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <PrivateRoute>
+                  <Search />
                 </PrivateRoute>
               }
             />
