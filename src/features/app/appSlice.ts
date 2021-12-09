@@ -18,13 +18,13 @@ export const init = createAsyncThunk(
   async (id: number, { dispatch, getState }) => {
     const state = getState() as { user: UserState };
     return await Promise.all([
-      dispatch(fetchUser(id)),
+      dispatch(fetchUser(id)).unwrap(),
       dispatch(
         fetchUserChannels({
           portion: state.user.lastPortion + 1,
           count: state.user.count,
         })
-      ),
+      ).unwrap(),
     ]);
   }
 );
@@ -35,6 +35,9 @@ const appSlice = createSlice({
   reducers: {
     initChanged: (state, action) => {
       state.isInit = action.payload;
+    },
+    initErrorChanged: (state, action) => {
+      state.error = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -55,6 +58,6 @@ const appSlice = createSlice({
   },
 });
 
-export const { initChanged } = appSlice.actions;
+export const { initChanged, initErrorChanged } = appSlice.actions;
 
 export default appSlice.reducer;

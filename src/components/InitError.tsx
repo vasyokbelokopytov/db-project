@@ -1,6 +1,6 @@
 import { Button, Result } from 'antd';
 import React from 'react';
-import { useAppDispatch } from '../app/hooks';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { init } from '../features/app/appSlice';
 import { authorize } from '../features/auth/authSlice';
 
@@ -11,8 +11,14 @@ interface Props {
 
 export const InitError: React.FC<Props> = ({ error, loading }) => {
   const dispatch = useAppDispatch();
+  const authId = useAppSelector((state) => state.auth.id);
 
   const clickHandler = () => {
+    if (authId) {
+      dispatch(init(authId));
+      return;
+    }
+
     dispatch(authorize());
   };
 
