@@ -6,6 +6,7 @@ export interface SearchState {
   users: (User & WithPhoto & WithId)[];
   isUsersFetching: boolean;
   fetchingError: string | null;
+  query: string;
   page: number;
   count: number;
   total: number | null;
@@ -16,24 +17,22 @@ const initialState: SearchState = {
   users: [],
   isUsersFetching: false,
   fetchingError: null,
+  query: '',
   page: 1,
   count: 10,
   total: null,
   contact: false,
 };
 
-const fetchUsers = createAsyncThunk(
+export const fetchUsers = createAsyncThunk(
   'search/usersFetched',
-  async ({
-    page,
-    count,
-    contact,
-  }: {
+  async (searchData: {
     page: number;
     count: number;
     contact: boolean;
+    query: string;
   }) => {
-    const response = await searchAPI.get(page, count, contact);
+    const response = await searchAPI.get(searchData);
     return response.data;
   }
 );
@@ -42,6 +41,9 @@ const searchSlice = createSlice({
   name: 'search',
   initialState,
   reducers: {
+    queryChanged: (state, action) => {
+      state.query = action.payload;
+    },
     pageChanged: (state, action) => {
       state.page = action.payload;
     },
@@ -68,7 +70,7 @@ const searchSlice = createSlice({
       }),
 });
 
-export const { contactChanged, countChanged, pageChanged } =
+export const { contactChanged, countChanged, pageChanged, queryChanged } =
   searchSlice.actions;
 
 export default searchSlice.reducer;

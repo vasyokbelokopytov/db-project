@@ -4,6 +4,7 @@ import userReducer from '../features/user/userSlice';
 import channelReducer from '../features/channel/channelSlice';
 import postReducer from '../features/post/postSlice';
 import searchReducer from '../features/search/searchSlice';
+import contactReducer from '../features/contacts/contactSlice';
 
 import appReducer from '../features/app/appSlice';
 
@@ -15,6 +16,7 @@ export const store = configureStore({
     post: postReducer,
     app: appReducer,
     search: searchReducer,
+    contact: contactReducer,
   },
 });
 

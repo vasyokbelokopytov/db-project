@@ -1,115 +1,25 @@
 import { Avatar, Button, Card, ConfigProvider, Empty, List } from 'antd';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { UserOutlined } from '@ant-design/icons';
-import { User, WithId, WithPhoto } from '../../app/types';
-
-const data = [
-  {
-    id: 1,
-    department: 'boroda',
-    login: 'vfcsdcscdckj',
-    name: 'vfvf',
-    photo: null,
-    status: 'lecturer',
-  },
-  {
-    id: 2,
-    department: 'borffoda',
-    login: 'vfckj',
-    name: 'vfvbvf',
-    photo: null,
-    status: 'student',
-    group: 'cx',
-  },
-  {
-    id: 3,
-    department: 'boroda123',
-    login: 'vfckjtra',
-    name: 'vfvfaaa',
-    photo: null,
-    status: 'lecturer',
-  },
-  {
-    id: 1,
-    department: 'boroda',
-    login: 'vfcsdcscdckj',
-    name: 'vfvf',
-    photo: null,
-    status: 'lecturer',
-  },
-  {
-    id: 2,
-    department: 'borffoda',
-    login: 'vfckj',
-    name: 'vfvbvf',
-    photo: null,
-    status: 'student',
-    group: 'cx',
-  },
-  {
-    id: 3,
-    department: 'boroda123',
-    login: 'vfckjtra',
-    name: 'vfvfaaa',
-    photo: null,
-    status: 'lecturer',
-  },
-  {
-    id: 1,
-    department: 'boroda',
-    login: 'vfcsdcscdckj',
-    name: 'vfvf',
-    photo: null,
-    status: 'lecturer',
-  },
-  {
-    id: 2,
-    department: 'borffoda',
-    login: 'vfckj',
-    name: 'vfvbvf',
-    photo: null,
-    status: 'student',
-    group: 'cx',
-  },
-  {
-    id: 3,
-    department: 'boroda123',
-    login: 'vfckjtra',
-    name: 'vfvfaaa',
-    photo: null,
-    status: 'lecturer',
-  },
-  {
-    id: 1,
-    department: 'boroda',
-    login: 'vfcsdcscdckj',
-    name: 'vfvf',
-    photo: null,
-    status: 'lecturer',
-  },
-  {
-    id: 2,
-    department: 'borffoda',
-    login: 'vfckj',
-    name: 'vfvbvf',
-    photo: null,
-    status: 'student',
-    group: 'cx',
-  },
-  {
-    id: 3,
-    department: 'boroda123',
-    login: 'vfckjtra',
-    name: 'vfvfaaa',
-    photo: null,
-    status: 'lecturer',
-  },
-];
-
-const data1: (User & WithId & WithPhoto)[] = [];
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import { fetchUsers } from '../../features/search/searchSlice';
+import { addContact } from '../../features/contacts/contactSlice';
 
 export const UserList: React.FC = () => {
+  const users = useAppSelector((state) => state.search.users);
+  const query = useAppSelector((state) => state.search.query);
+  const count = useAppSelector((state) => state.search.count);
+  const contact = useAppSelector((state) => state.search.contact);
+  const page = useAppSelector((state) => state.search.page);
+  const isFetching = useAppSelector((state) => state.search.isUsersFetching);
+
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(fetchUsers({ query, count, contact, page }));
+  }, [query, count, contact, page, dispatch]);
+
   return (
     <Card
       className="w-full h-3/4 flex-grow mb-6"
@@ -130,11 +40,18 @@ export const UserList: React.FC = () => {
       >
         <List
           className={`overflow-y-scroll h-full ${
-            !data1.length && 'flex justify-center items-center'
+            !users.length && 'flex justify-center items-center'
           }`}
-          dataSource={data1}
+          dataSource={users}
+          loading={isFetching}
           renderItem={(item) => (
-            <List.Item actions={[<Button>Додати у контакти</Button>]}>
+            <List.Item
+              actions={[
+                <Button onClick={() => dispatch(addContact(item.id))}>
+                  Додати у контакти
+                </Button>,
+              ]}
+            >
               <List.Item.Meta
                 avatar={<Avatar src={item.photo} icon={<UserOutlined />} />}
                 title={item.name}

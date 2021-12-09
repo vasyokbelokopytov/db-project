@@ -1,31 +1,10 @@
 import { Avatar, List, ConfigProvider, Empty } from 'antd';
 import React from 'react';
-import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
-
-const data: { id: number; title: string }[] = [
-  // {
-  //   id: 1,
-  //   title: 'me',
-  // },
-  // {
-  //   id: 2,
-  //   title: 'me',
-  // },
-  // {
-  //   id: 3,
-  //   title: 'me',
-  // },
-  // {
-  //   id: 4,
-  //   title: 'me',
-  // },
-  // {
-  //   id: 5,
-  //   title: 'me',
-  // },
-];
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAppSelector } from '../../app/hooks';
 
 export const AsideContacts: React.FC = () => {
+  const contacts = useAppSelector((state) => state.contact.contacts);
   const navigate = useNavigate();
   const params = useParams();
   const userId = params.userId;
@@ -41,9 +20,9 @@ export const AsideContacts: React.FC = () => {
         )}
       >
         <List
-          className={`w-full h-full ${!data.length && 'flex items-center'}`}
+          className={`w-full h-full ${!contacts.length && 'flex items-center'}`}
           itemLayout="horizontal"
-          dataSource={data}
+          dataSource={contacts}
           renderItem={(item) => (
             <List.Item
               className={
@@ -55,7 +34,7 @@ export const AsideContacts: React.FC = () => {
             >
               <List.Item.Meta
                 avatar={<Avatar src="https://joeschmoe.io/api/v1/random" />}
-                title={item.title}
+                title={item.name}
                 description={
                   <p className="truncate">
                     Lorem, ipsum dolor sit amet consectetur adipisicing elit.
