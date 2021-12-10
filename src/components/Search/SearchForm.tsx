@@ -11,7 +11,7 @@ interface Props {
 
 export interface SearchFormData {
   query: string;
-  contact: 'null' | 'true' | 'false';
+  contact: '0' | '1' | '2';
 }
 
 export const SearchForm: React.FC<Props> = ({ onSubmit }) => {
@@ -34,9 +34,9 @@ export const SearchForm: React.FC<Props> = ({ onSubmit }) => {
       <Space size="middle" className="mb-6">
         <Form.Item name="contact" initialValue={String(contact)} noStyle>
           <Select style={{ width: 150 }}>
-            <Option value={'null'}>Всі</Option>
-            <Option value={'true'}>Тільки контакти</Option>
-            <Option value={'false'}>Тільки не контакти</Option>
+            <Option value={'0'}>Всі</Option>
+            <Option value={'1'}>Тільки контакти</Option>
+            <Option value={'2'}>Тільки не контакти</Option>
           </Select>
         </Form.Item>
         <Button type="primary" htmlType="submit" loading={isFetching}>

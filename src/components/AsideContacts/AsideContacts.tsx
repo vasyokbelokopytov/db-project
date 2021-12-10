@@ -1,4 +1,5 @@
 import { Avatar, List, ConfigProvider, Empty } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppSelector } from '../../app/hooks';
@@ -27,20 +28,27 @@ export const AsideContacts: React.FC = () => {
             <List.Item
               className={
                 userId && +userId === item.id
-                  ? 'bg-blue-100 rounded-md cursor-pointer'
-                  : 'cursor-pointer'
+                  ? 'bg-blue-100 rounded-md cursor-pointer p-2'
+                  : 'cursor-pointer p-2'
               }
               onClick={() => navigate(`chat/${item.id}`)}
             >
               <List.Item.Meta
-                avatar={<Avatar src="https://joeschmoe.io/api/v1/random" />}
-                title={item.name}
+                avatar={
+                  <Avatar
+                    src={item.photo}
+                    icon={<UserOutlined />}
+                    size="large"
+                  />
+                }
+                title={<p className="truncate">{item.name}</p>}
                 description={
                   <p className="truncate">
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                    Dolorem doloribus non vel voluptatem aspernatur soluta esse
-                    impedit, doloremque sequi quae nihil, quod excepturi magni
-                    aut fuga aperiam quaerat temporibus debitis?
+                    {item.status === 'student' &&
+                      `Студент групи ${item.group} кафедри ${item.department}`}
+
+                    {item.status === 'lecturer' &&
+                      `Викладач кафедри ${item.department}`}
                   </p>
                 }
               />

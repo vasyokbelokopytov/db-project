@@ -17,6 +17,7 @@ export interface UserBasic {
   name: string;
   department: string;
   status: Status;
+  contact: boolean | null;
 }
 
 export interface Lecturer extends UserBasic {
@@ -33,6 +34,7 @@ export type User = Lecturer | Student;
 export interface Channel {
   name: string;
   description: string;
+  members: number[];
 }
 
 export type ChannelPreview = Pick<

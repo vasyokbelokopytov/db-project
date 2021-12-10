@@ -10,7 +10,7 @@ export interface SearchState {
   page: number;
   count: number;
   total: number | null;
-  contact: boolean;
+  contact: '0' | '1' | '2';
 }
 
 const initialState: SearchState = {
@@ -21,7 +21,7 @@ const initialState: SearchState = {
   page: 1,
   count: 10,
   total: null,
-  contact: false,
+  contact: '0',
 };
 
 export const fetchUsers = createAsyncThunk(
@@ -29,7 +29,7 @@ export const fetchUsers = createAsyncThunk(
   async (searchData: {
     page: number;
     count: number;
-    contact: boolean;
+    contact: '0' | '1' | '2';
     query: string;
   }) => {
     const response = await searchAPI.get(searchData);
@@ -41,6 +41,15 @@ const searchSlice = createSlice({
   name: 'search',
   initialState,
   reducers: {
+    userChanged: (state, action) => {
+      state.users = state.users.map((user) => {
+        if (user.id === action.payload.id) {
+          return action.payload;
+        }
+
+        return user;
+      });
+    },
     queryChanged: (state, action) => {
       state.query = action.payload;
     },
@@ -70,7 +79,12 @@ const searchSlice = createSlice({
       }),
 });
 
-export const { contactChanged, countChanged, pageChanged, queryChanged } =
-  searchSlice.actions;
+export const {
+  contactChanged,
+  countChanged,
+  pageChanged,
+  queryChanged,
+  userChanged,
+} = searchSlice.actions;
 
 export default searchSlice.reducer;

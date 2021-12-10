@@ -1,4 +1,4 @@
-import { Modal, Form, Input, Upload, Avatar } from 'antd';
+import { Modal, Form, Input, Upload, Avatar, Select, Typography } from 'antd';
 import { MessageOutlined } from '@ant-design/icons';
 import React, { useEffect } from 'react';
 import {
@@ -16,11 +16,14 @@ import {
 } from '../../features/channel/channelSlice';
 import { Channel } from '../../app/types';
 
+const { Option } = Select;
+
 export const CreateChannelForm: React.FC = () => {
   const isOpened = useAppSelector((state) => state.channel.isCreatorOpened);
   const isLoading = useAppSelector((state) => state.channel.isCreating);
   const succeed = useAppSelector((state) => state.channel.createdSucceed);
   const error = useAppSelector((state) => state.channel.creationError);
+  const contacts = useAppSelector((state) => state.contact.contacts);
 
   const { img, setImg, dummyRequest, beforeUpload, handleChange } =
     useImageUpload(null);
@@ -99,6 +102,26 @@ export const CreateChannelForm: React.FC = () => {
 
           <Form.Item name="description" initialValue={null}>
             <Input placeholder="Опис каналу (не обов'язково)" />
+          </Form.Item>
+
+          <Form.Item name="members" initialValue={[]}>
+            <Select
+              mode="multiple"
+              style={{ width: '100%' }}
+              placeholder="Виберіть учасників зі свого списку контактів"
+            >
+              {contacts.map((c) => (
+                <Option value={c.id} key={c.id}>
+                  <div className="flex gap-2 items-center">
+                    <Avatar src={c.photo} size={20} />
+                    <Typography.Text>{c.name} </Typography.Text>
+                    <Typography.Text type="secondary">
+                      ({c.name})
+                    </Typography.Text>
+                  </div>
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
         </Form>
       </div>

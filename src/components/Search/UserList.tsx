@@ -4,7 +4,10 @@ import React, { useEffect } from 'react';
 import { UserOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { fetchUsers } from '../../features/search/searchSlice';
-import { addContact } from '../../features/contacts/contactSlice';
+import {
+  addContact,
+  removeContact,
+} from '../../features/contacts/contactSlice';
 
 export const UserList: React.FC = () => {
   const users = useAppSelector((state) => state.search.users);
@@ -13,6 +16,9 @@ export const UserList: React.FC = () => {
   const contact = useAppSelector((state) => state.search.contact);
   const page = useAppSelector((state) => state.search.page);
   const isFetching = useAppSelector((state) => state.search.isUsersFetching);
+  const contactsInProcess = useAppSelector(
+    (state) => state.contact.contactsInProcess
+  );
 
   const dispatch = useAppDispatch();
 
@@ -46,11 +52,28 @@ export const UserList: React.FC = () => {
           loading={isFetching}
           renderItem={(item) => (
             <List.Item
-              actions={[
-                <Button onClick={() => dispatch(addContact(item.id))}>
-                  Додати у контакти
-                </Button>,
-              ]}
+              actions={
+                item.contact === null
+                  ? []
+                  : [
+                      item.contact === true ? (
+                        <Button
+                          loading={contactsInProcess.includes(item.id)}
+                          danger
+                          onClick={() => dispatch(removeContact(item.id))}
+                        >
+                          Видалити з контактів
+                        </Button>
+                      ) : (
+                        <Button
+                          loading={contactsInProcess.includes(item.id)}
+                          onClick={() => dispatch(addContact(item.id))}
+                        >
+                          Додати у контакти
+                        </Button>
+                      ),
+                    ]
+              }
             >
               <List.Item.Meta
                 avatar={<Avatar src={item.photo} icon={<UserOutlined />} />}

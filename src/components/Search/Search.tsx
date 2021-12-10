@@ -1,4 +1,4 @@
-import { Pagination, Space } from 'antd';
+import { Pagination } from 'antd';
 import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
@@ -19,6 +19,7 @@ export const Search: React.FC = () => {
   const contact = useAppSelector((state) => state.search.contact);
   const page = useAppSelector((state) => state.search.page);
   const count = useAppSelector((state) => state.search.count);
+  const isFetching = useAppSelector((state) => state.search.isUsersFetching);
   const dispatch = useAppDispatch();
 
   const queryParam = params.get('query');
@@ -27,12 +28,11 @@ export const Search: React.FC = () => {
   const countParam = params.get('count');
 
   useEffect(() => {
-    dispatch(queryChanged(queryParam));
-    dispatch(
-      contactChanged(
-        contactParam === 'false' ? false : contactParam === 'true' ? true : null
-      )
-    );
+    dispatch(queryChanged(!queryParam ? '' : queryParam));
+
+    if (contactParam && ['0', '1', '2'].includes(contactParam)) {
+      dispatch(contactChanged(contactParam));
+    }
 
     if (!isNaN(Number(pageParam)) && Number(pageParam) > 0) {
       dispatch(pageChanged(Number(pageParam)));
@@ -44,41 +44,36 @@ export const Search: React.FC = () => {
   }, [contactParam, countParam, dispatch, pageParam, queryParam]);
 
   const submitHandler = (data: SearchFormData) => {
-    console.log(count);
-
-    if (data.contact === 'null') {
-      setParams({
-        query: data.query,
-        page: '1',
-        count: String(count),
-      });
-      return;
+    if (data.query) {
+      params.set('query', data.query);
+    } else {
+      params.delete('query');
     }
 
-    setParams({
-      query: data.query,
-      contact: data.contact,
-      page: '1',
-      count: String(count),
-    });
+    params.set('contact', data.contact);
+    params.set('page', '1');
+    params.set('count', String(count));
+
+    setParams(params);
   };
 
-  const paginationChangeHandler = (page: number, pageSize: number) => {
-    if (contact === null) {
-      setParams({
-        query,
-        page: String(page),
-        count: String(pageSize),
-      });
-      return;
+  const paginationChangeHandler = (newPage: number, newCount: number) => {
+    if (query) {
+      params.set('query', query);
+    } else {
+      params.delete('query');
     }
 
-    setParams({
-      query,
-      contact: String(contact),
-      page: String(page),
-      count: String(pageSize),
-    });
+    params.set('contact', contact);
+
+    if (page !== newPage) {
+      params.set('page', String(newPage));
+    } else if (count !== newCount) {
+      params.set('page', '1');
+    }
+
+    params.set('count', String(newCount));
+    setParams(params);
   };
 
   return (
@@ -86,6 +81,7 @@ export const Search: React.FC = () => {
       <SearchForm onSubmit={submitHandler} />
       <UserList />
       <Pagination
+        disabled={isFetching}
         current={page}
         total={total ?? 0}
         pageSize={count}

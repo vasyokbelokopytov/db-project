@@ -1,18 +1,16 @@
+import { AxiosError } from 'axios';
+import { SearchState } from './../search/searchSlice';
 import { contactAPI } from './contactAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { WithId, WithPhoto } from './../../app/types';
 import { User } from '../../app/types';
+import { userChanged } from '../search/searchSlice';
 
 export interface ContactState {
   contacts: (User & WithId & WithPhoto)[];
 
-  isContactChecking: boolean;
-  checkingError: string | null;
-
-  isContactAdding: boolean;
+  contactsInProcess: number[];
   addingError: string | null;
-
-  isContactRemoving: boolean;
   removingError: string | null;
 
   isContactsFetching: boolean;
@@ -22,40 +20,86 @@ export interface ContactState {
 const initialState: ContactState = {
   contacts: [],
 
-  isContactChecking: false,
-  checkingError: null,
-
-  isContactAdding: false,
+  contactsInProcess: [],
   addingError: null,
-
-  isContactRemoving: false,
   removingError: null,
 
   isContactsFetching: false,
   fetchingError: null,
 };
 
-export const checkIsContact = createAsyncThunk(
-  'contact/checked',
-  async (id: number) => {
-    const response = await contactAPI.check(id);
-    return response.data;
-  }
-);
-
-export const addContact = createAsyncThunk(
+export const addContact = createAsyncThunk<User & WithId & WithPhoto, number>(
   'contact/added',
-  async (id: number) => {
-    const response = await contactAPI.add(id);
-    return response.data;
+  async (id: number, { getState, dispatch, rejectWithValue }) => {
+    const state = getState() as { search: SearchState };
+    try {
+      const response = await contactAPI.add(id);
+
+      if (response.errors.length) {
+        return rejectWithValue(response.errors[0]);
+      }
+
+      const user = state.search.users.find((user) => user.id === id);
+
+      if (user) {
+        const newUser: User & WithId & WithPhoto = {
+          ...user,
+          contact: true,
+        };
+
+        dispatch(userChanged(newUser));
+
+        return newUser;
+      }
+
+      return rejectWithValue('User not found');
+    } catch (e) {
+      const error = e as AxiosError;
+      if (error.response && error.response.statusText) {
+        return rejectWithValue(error.response.statusText);
+      }
+
+      return rejectWithValue('Some error occured');
+    }
   }
 );
 
-export const removeContact = createAsyncThunk(
+export const removeContact = createAsyncThunk<
+  User & WithId & WithPhoto,
+  number
+>(
   'contact/removed',
-  async (id: number) => {
-    const response = await contactAPI.remove(id);
-    return response.data;
+  async (id: number, { getState, dispatch, rejectWithValue }) => {
+    const state = getState() as { search: SearchState };
+    try {
+      const response = await contactAPI.remove(id);
+
+      if (response.errors.length) {
+        return rejectWithValue(response.errors[0]);
+      }
+
+      const user = state.search.users.find((user) => user.id === id);
+
+      if (user) {
+        const newUser: User & WithId & WithPhoto = {
+          ...user,
+          contact: false,
+        };
+
+        dispatch(userChanged(newUser));
+
+        return newUser;
+      }
+
+      return rejectWithValue('User not found');
+    } catch (e) {
+      const error = e as AxiosError;
+      if (error.response && error.response.statusText) {
+        return rejectWithValue(error.response.statusText);
+      }
+
+      return rejectWithValue('Some error occured');
+    }
   }
 );
 
@@ -63,18 +107,39 @@ const contactSlice = createSlice({
   name: 'contact',
   initialState,
   reducers: {},
+
   extraReducers: (builder) =>
     builder
-      .addCase(addContact.pending, (state) => {
-        state.isContactAdding = true;
+      .addCase(addContact.pending, (state, action) => {
+        state.contactsInProcess.push(action.meta.arg);
       })
       .addCase(addContact.fulfilled, (state, action) => {
-        state.isContactAdding = false;
+        state.contactsInProcess = state.contactsInProcess.filter(
+          (id) => id !== action.meta.arg
+        );
         state.contacts.push(action.payload);
       })
       .addCase(addContact.rejected, (state, action) => {
-        state.isContactAdding = false;
+        state.contactsInProcess = state.contactsInProcess.filter(
+          (id) => id !== action.meta.arg
+        );
         state.addingError = action.error.message ?? null;
+      })
+
+      .addCase(removeContact.pending, (state, action) => {
+        state.contactsInProcess.push(action.meta.arg);
+      })
+      .addCase(removeContact.fulfilled, (state, action) => {
+        state.contactsInProcess = state.contactsInProcess.filter(
+          (id) => id !== action.meta.arg
+        );
+        state.contacts = state.contacts.filter((c) => c.id !== action.meta.arg);
+      })
+      .addCase(removeContact.rejected, (state, action) => {
+        state.contactsInProcess = state.contactsInProcess.filter(
+          (id) => id !== action.meta.arg
+        );
+        state.removingError = action.error.message ?? null;
       }),
 });
 
