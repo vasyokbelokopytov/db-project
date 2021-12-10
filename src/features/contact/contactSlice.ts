@@ -1,8 +1,8 @@
 import { AxiosError } from 'axios';
-import { SearchState } from './../search/searchSlice';
+import { SearchState } from '../search/searchSlice';
 import { contactAPI } from './contactAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { WithId, WithPhoto } from './../../app/types';
+import { WithId, WithPhoto } from '../../app/types';
 import { User } from '../../app/types';
 import { userChanged } from '../search/searchSlice';
 

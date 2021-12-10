@@ -1,4 +1,5 @@
-import { Button, Card, Result, Spin, Typography } from 'antd';
+import { Avatar, Button, Card, Result, Spin, Typography } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
 
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router';
@@ -8,14 +9,19 @@ import {
   fetchChannel,
   postsChanged,
 } from '../../features/channel/channelSlice';
-import { Display } from './Display';
-import { Field } from './Field';
+import {
+  fetchDirect,
+  messagesChanged,
+} from '../../features/direct/directSlice';
+import { Display } from '../Direct/Display';
+import { Field } from '../Direct/Field';
 
-export const Channel: React.FC = () => {
-  const authId = useAppSelector((state) => state.auth.id);
-  const channel = useAppSelector((state) => state.channel.channel);
-  const isFetching = useAppSelector((state) => state.channel.isFetching);
-  const fetchingError = useAppSelector((state) => state.channel.fetchingError);
+export const Direct: React.FC = () => {
+  const direct = useAppSelector((state) => state.direct.direct);
+  const isFetching = useAppSelector((state) => state.direct.isDirectFetching);
+  const fetchingError = useAppSelector(
+    (state) => state.direct.directFetchingError
+  );
 
   const dispatch = useAppDispatch();
 
@@ -23,33 +29,34 @@ export const Channel: React.FC = () => {
 
   useEffect(() => {
     if (
-      params.channelId &&
-      (channel === null || +params.channelId !== channel.id)
+      params.contactId &&
+      (direct === null || +params.contactId !== direct.contact.id)
     ) {
-      dispatch(postsChanged(null));
-      dispatch(fetchChannel(+params.channelId));
+      dispatch(messagesChanged(null));
+      dispatch(fetchDirect(+params.contactId));
     }
-  }, [params.channelId, channel, dispatch]);
-
-  const openEditor = () => {
-    dispatch(editorOpened());
-  };
+  }, [params.contactId, direct, dispatch]);
 
   const clickHandler = () => {
     if (params.channelId) {
-      dispatch(fetchChannel(+params.channelId));
+      dispatch(fetchDirect(+params.channelId));
     }
   };
 
-  if (channel && !fetchingError && !isFetching)
+  if (direct && !fetchingError && !isFetching)
     return (
       <Card
-        title={channel.name}
-        extra={
-          channel.creatorId === authId && (
-            <Typography.Link onClick={openEditor}>Edit</Typography.Link>
-          )
+        title={
+          <div className="flex gap-2 items-center">
+            <Avatar
+              src={direct.contact.photo}
+              icon={<UserOutlined />}
+              size={'large'}
+            />
+            <p>{direct.contact.name}</p>
+          </div>
         }
+        extra={<Typography.Link>Edit</Typography.Link>}
         className="w-full h-full flex flex-col"
         bodyStyle={{
           display: 'flex',
@@ -78,7 +85,7 @@ export const Channel: React.FC = () => {
       {fetchingError && (
         <Result
           status="warning"
-          title="Виникла помилка під час завантаження каналу"
+          title="Виникла помилка під час завантаження"
           subTitle={fetchingError}
           extra={
             <Button type="primary" onClick={clickHandler} loading={isFetching}>

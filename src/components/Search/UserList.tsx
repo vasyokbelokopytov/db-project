@@ -4,10 +4,7 @@ import React, { useEffect } from 'react';
 import { UserOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { fetchUsers } from '../../features/search/searchSlice';
-import {
-  addContact,
-  removeContact,
-} from '../../features/contacts/contactSlice';
+import { addContact, removeContact } from '../../features/contact/contactSlice';
 
 export const UserList: React.FC = () => {
   const users = useAppSelector((state) => state.search.users);

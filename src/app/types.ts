@@ -34,6 +34,7 @@ export type User = Lecturer | Student;
 export interface Channel {
   name: string;
   description: string;
+  creatorId: number;
   members: number[];
 }
 
@@ -70,4 +71,17 @@ export interface ChannelCreatedData {
 
 export interface PostCreatedData {
   id: number;
+}
+
+export interface MessageCreatedData {
+  id: number;
+}
+
+export interface Direct {
+  contact: User & WithId & WithPhoto;
+}
+
+export interface Message {
+  authorId: number;
+  text: string;
 }

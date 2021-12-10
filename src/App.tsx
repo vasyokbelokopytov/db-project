@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import { Body } from './components/Body';
 import { Channel } from './components/Channel/Channel';
+import { Direct } from './components/Direct/Direct';
 import { EmptyMain } from './components/EmptyMain';
 
 import { Header } from './components/Header/Header';
@@ -71,10 +72,10 @@ export const App: React.FC = () => {
               }
             />
             <Route
-              path="/chat/:userId"
+              path="/direct/:contactId"
               element={
                 <PrivateRoute>
-                  <EmptyMain />
+                  <Direct />
                 </PrivateRoute>
               }
             />

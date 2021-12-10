@@ -8,7 +8,7 @@ export const AsideContacts: React.FC = () => {
   const contacts = useAppSelector((state) => state.contact.contacts);
   const navigate = useNavigate();
   const params = useParams();
-  const userId = params.userId;
+  const userId = params.contactId;
 
   return (
     <aside className="flex-none w-56 border-l-2 p-2">
@@ -31,7 +31,7 @@ export const AsideContacts: React.FC = () => {
                   ? 'bg-blue-100 rounded-md cursor-pointer p-2'
                   : 'cursor-pointer p-2'
               }
-              onClick={() => navigate(`chat/${item.id}`)}
+              onClick={() => navigate(`direct/${item.id}`)}
             >
               <List.Item.Meta
                 avatar={

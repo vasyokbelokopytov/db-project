@@ -7,26 +7,18 @@ import { Post } from '../../app/types';
 import { ChannelState, postAdded } from '../channel/channelSlice';
 import { UserState } from '../user/userSlice';
 
-export interface PostsState {
-  post: (Post & WithId)[] | null;
-  total: number | null;
+export interface PostState {
+  post: (Post & WithId) | null;
 
-  isFetching: boolean;
   isSending: boolean;
   sendingError: string | null;
-
-  fetchingError: string | null;
 }
 
-const initialState: PostsState = {
+const initialState: PostState = {
   post: null,
-  total: null,
 
   isSending: false,
   sendingError: null,
-
-  isFetching: false,
-  fetchingError: null,
 };
 
 export const sendPost = createAsyncThunk<Response<PostCreatedData>, string>(
