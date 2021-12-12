@@ -221,8 +221,20 @@ const channelSlice = createSlice({
       state.editedSucceed = action.payload;
     },
 
+    editingErrorChanged: (state, action) => {
+      state.editingError = action.payload;
+    },
+
     postsChanged: (state, action) => {
       state.posts = action.payload;
+    },
+
+    totalPostsChanged: (state, action) => {
+      state.totalPosts = action.payload;
+    },
+
+    lastPortionChanged: (state, action) => {
+      state.lastPortion = action.payload;
     },
 
     postAdded: (state, action) => {
@@ -303,6 +315,9 @@ export const {
   editedSucceedChanged,
   postsChanged,
   postAdded,
+  lastPortionChanged,
+  totalPostsChanged,
+  editingErrorChanged,
 } = channelSlice.actions;
 
 export default channelSlice.reducer;

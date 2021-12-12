@@ -23,7 +23,7 @@ export const CreateChannelForm: React.FC = () => {
   const isLoading = useAppSelector((state) => state.channel.isCreating);
   const succeed = useAppSelector((state) => state.channel.createdSucceed);
   const error = useAppSelector((state) => state.channel.creationError);
-  const contacts = useAppSelector((state) => state.contact.contacts);
+  const contacts = useAppSelector((state) => state.user.contacts);
 
   const { img, setImg, dummyRequest, beforeUpload, handleChange } =
     useImageUpload(null);

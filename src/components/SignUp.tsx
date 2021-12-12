@@ -85,7 +85,7 @@ export const SignUp: React.FC = () => {
         >
           <Select placeholder="Ваш статус" onChange={statusChangeHandler}>
             <Option value="student">Студент</Option>
-            <Option value="lecturer">Викладач</Option>
+            <Option value="instructor">Викладач</Option>
           </Select>
         </Form.Item>
 

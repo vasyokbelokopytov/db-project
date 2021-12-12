@@ -21,12 +21,20 @@ export interface UserState {
   updatingError: string | null;
 
   channels: ChannelPreview[];
-  count: number;
-  lastPortion: number;
-  total: number | null;
+  channelsCount: number;
+  channelsLastPortion: number;
+  channelsTotal: number | null;
+
+  contacts: (User & WithId & WithPhoto)[];
+  contactsCount: number;
+  contactsLastPortion: number;
+  contactsTotal: number | null;
 
   isChannelsFetching: boolean;
   channelsFetchingError: string | null;
+
+  isContactsFetching: boolean;
+  contactsFetchingError: string | null;
 }
 
 const initialState: UserState = {
@@ -39,11 +47,20 @@ const initialState: UserState = {
   updatingError: null,
 
   channels: [],
-  count: 10,
-  lastPortion: 0,
-  total: null,
+  channelsCount: 10,
+  channelsLastPortion: 0,
+  channelsTotal: null,
+
+  contacts: [],
+  contactsCount: 5,
+  contactsLastPortion: 0,
+  contactsTotal: null,
+
   isChannelsFetching: false,
   channelsFetchingError: null,
+
+  isContactsFetching: false,
+  contactsFetchingError: null,
 };
 
 export const fetchUser = createAsyncThunk<
@@ -136,12 +153,43 @@ export const fetchUserChannels = createAsyncThunk<
   }
 );
 
+export const fetchUserContacts = createAsyncThunk<
+  ItemsResponse<(User & WithId & WithPhoto)[]>,
+  { portion: number; count: number },
+  {
+    rejectValue: string;
+  }
+>('user/contacts_fetched', async ({ portion, count }, { rejectWithValue }) => {
+  try {
+    const response = await userAPI.getContacts(portion, count);
+    if (response.data.errors[0]) {
+      return rejectWithValue(response.data.errors[0]);
+    }
+
+    return response.data;
+  } catch (e) {
+    const error = e as AxiosError;
+    if (error.response && error.response.status === 401) {
+      return rejectWithValue(error.response.data.errors[0]);
+    }
+    return rejectWithValue(error.response?.statusText ?? 'Some error occured');
+  }
+});
+
 export const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
     addChannel: (state, action) => {
       state.channels.push(action.payload);
+    },
+
+    addUserContact: (state, action) => {
+      state.contacts.push(action.payload);
+    },
+
+    removeUserContact: (state, action) => {
+      state.contacts = state.contacts.filter((c) => c.id !== action.payload);
     },
 
     userChanged: (state, action) => {
@@ -198,13 +246,28 @@ export const userSlice = createSlice({
       .addCase(fetchUserChannels.fulfilled, (state, action) => {
         state.isChannelsFetching = false;
         state.channels = [...state.channels, ...action.payload.data.items];
-        state.lastPortion += 1;
+        state.channelsLastPortion += 1;
 
-        state.total = action.payload.data.total;
+        state.channelsTotal = action.payload.data.total;
       })
       .addCase(fetchUserChannels.rejected, (state, action) => {
         state.channelsFetchingError = action.payload ?? null;
         state.isChannelsFetching = false;
+      })
+
+      .addCase(fetchUserContacts.pending, (state) => {
+        state.isContactsFetching = true;
+      })
+      .addCase(fetchUserContacts.fulfilled, (state, action) => {
+        state.isContactsFetching = false;
+        state.contacts = [...state.contacts, ...action.payload.data.items];
+        state.contactsLastPortion += 1;
+
+        state.contactsTotal = action.payload.data.total;
+      })
+      .addCase(fetchUserContacts.rejected, (state, action) => {
+        state.contactsFetchingError = action.payload ?? null;
+        state.isContactsFetching = false;
       });
   },
 });
@@ -216,6 +279,8 @@ export const {
   updateSucceedChanged,
   updatingErrorChanged,
   channelsFetchingErrorChanged,
+  addUserContact,
+  removeUserContact,
 } = userSlice.actions;
 
 export default userSlice.reducer;

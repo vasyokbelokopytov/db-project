@@ -1,6 +1,7 @@
+import { AxiosError } from 'axios';
 import { searchAPI } from './searchAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { WithPhoto, WithId, User } from './../../app/types';
+import { WithPhoto, WithId, User, ItemsResponse } from './../../app/types';
 
 export interface SearchState {
   users: (User & WithPhoto & WithId)[];
@@ -24,18 +25,31 @@ const initialState: SearchState = {
   contact: '0',
 };
 
-export const fetchUsers = createAsyncThunk(
-  'search/usersFetched',
-  async (searchData: {
+export const fetchUsers = createAsyncThunk<
+  ItemsResponse<(User & WithPhoto & WithId)[]>,
+  {
     page: number;
     count: number;
     contact: '0' | '1' | '2';
     query: string;
-  }) => {
+  },
+  { rejectValue: string }
+>('search/usersFetched', async (searchData, { rejectWithValue }) => {
+  try {
     const response = await searchAPI.get(searchData);
+    if (response.data.errors[0]) {
+      return rejectWithValue(response.data.errors[0]);
+    }
+
     return response.data;
+  } catch (e) {
+    const error = e as AxiosError;
+    if (error.response && error.response.status === 401) {
+      return rejectWithValue(error.response.data.errors[0]);
+    }
+    return rejectWithValue(error.response?.statusText ?? 'Some error occured');
   }
-);
+});
 
 const searchSlice = createSlice({
   name: 'search',
@@ -62,6 +76,10 @@ const searchSlice = createSlice({
     countChanged: (state, action) => {
       state.count = action.payload;
     },
+
+    fetchingErrorChanged: (state, action) => {
+      state.fetchingError = action.payload;
+    },
   },
   extraReducers: (builder) =>
     builder
@@ -70,12 +88,12 @@ const searchSlice = createSlice({
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.isUsersFetching = false;
-        state.users = action.payload.items;
-        state.total = action.payload.total;
+        state.users = action.payload.data.items;
+        state.total = action.payload.data.total;
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.isUsersFetching = false;
-        state.fetchingError = action.error.message ?? null;
+        state.fetchingError = action.payload ?? null;
       }),
 });
 
@@ -85,6 +103,7 @@ export const {
   pageChanged,
   queryChanged,
   userChanged,
+  fetchingErrorChanged,
 } = searchSlice.actions;
 
 export default searchSlice.reducer;

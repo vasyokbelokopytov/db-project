@@ -22,7 +22,13 @@ export const userAPI = {
 
   getChannels: (page: number, count: number) => {
     return template.get<ItemsResponse<ChannelPreview[]>>(
-      `/user/channels?page=${page}&count=${count}`
+      `user/channels?page=${page}&count=${count}`
+    );
+  },
+
+  getContacts: (page: number, count: number) => {
+    return template.get<ItemsResponse<(User & WithId & WithPhoto)[]>>(
+      `user/contacts?page=${page}&count=${count}`
     );
   },
 };

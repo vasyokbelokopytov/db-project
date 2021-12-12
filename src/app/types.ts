@@ -1,4 +1,4 @@
-export type Status = 'lecturer' | 'student';
+export type Status = 'instructor' | 'student';
 
 export interface WithId {
   id: number;
@@ -17,11 +17,11 @@ export interface UserBasic {
   name: string;
   department: string;
   status: Status;
-  contact: boolean | null;
+  isContact: boolean | null;
 }
 
 export interface Lecturer extends UserBasic {
-  status: 'lecturer';
+  status: 'instructor';
 }
 
 export interface Student extends UserBasic {
@@ -77,11 +77,8 @@ export interface MessageCreatedData {
   id: number;
 }
 
-export interface Direct {
-  contact: User & WithId & WithPhoto;
-}
-
 export interface Message {
+  receiverId: number;
   authorId: number;
   text: string;
 }

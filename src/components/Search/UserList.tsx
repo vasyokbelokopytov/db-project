@@ -1,5 +1,5 @@
 import { Avatar, Button, Card, ConfigProvider, Empty, List } from 'antd';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { UserOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
@@ -7,6 +7,7 @@ import { fetchUsers } from '../../features/search/searchSlice';
 import { addContact, removeContact } from '../../features/contact/contactSlice';
 
 export const UserList: React.FC = () => {
+  const [isInitRender, setIsInitRender] = useState(true);
   const users = useAppSelector((state) => state.search.users);
   const query = useAppSelector((state) => state.search.query);
   const count = useAppSelector((state) => state.search.count);
@@ -20,8 +21,12 @@ export const UserList: React.FC = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
+    if (isInitRender) {
+      setIsInitRender(false);
+      return;
+    }
     dispatch(fetchUsers({ query, count, contact, page }));
-  }, [query, count, contact, page, dispatch]);
+  }, [query, count, contact, page, dispatch, isInitRender]);
 
   return (
     <Card
@@ -50,10 +55,10 @@ export const UserList: React.FC = () => {
           renderItem={(item) => (
             <List.Item
               actions={
-                item.contact === null
+                item.isContact === null
                   ? []
                   : [
-                      item.contact === true ? (
+                      item.isContact === true ? (
                         <Button
                           loading={contactsInProcess.includes(item.id)}
                           danger
@@ -80,7 +85,7 @@ export const UserList: React.FC = () => {
                     {item.status === 'student' &&
                       `Студент групи ${item.group} кафедри ${item.department}`}
 
-                    {item.status === 'lecturer' &&
+                    {item.status === 'instructor' &&
                       `Викладач кафедри ${item.department}`}
                   </div>
                 }

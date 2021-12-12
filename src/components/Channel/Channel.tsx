@@ -6,7 +6,9 @@ import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import {
   editorOpened,
   fetchChannel,
+  lastPortionChanged,
   postsChanged,
+  totalPostsChanged,
 } from '../../features/channel/channelSlice';
 import { Display } from './Display';
 import { Field } from './Field';
@@ -27,6 +29,8 @@ export const Channel: React.FC = () => {
       (channel === null || +params.channelId !== channel.id)
     ) {
       dispatch(postsChanged(null));
+      dispatch(totalPostsChanged(null));
+      dispatch(lastPortionChanged(0));
       dispatch(fetchChannel(+params.channelId));
     }
   }, [params.channelId, channel, dispatch]);

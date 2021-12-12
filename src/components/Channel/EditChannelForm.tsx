@@ -1,4 +1,14 @@
-import { Modal, Form, Input, Upload, Avatar } from 'antd';
+import {
+  Modal,
+  Form,
+  Input,
+  Upload,
+  Avatar,
+  Select,
+  Typography,
+  Tag,
+} from 'antd';
+import CustomTagProps from 'rc-select/lib/generate';
 import { MessageOutlined } from '@ant-design/icons';
 import React, { useEffect } from 'react';
 import {
@@ -11,11 +21,15 @@ import {
 import {
   editChannel,
   editedSucceedChanged,
+  editingErrorChanged,
   editorClosed,
 } from '../../features/channel/channelSlice';
 import { Channel } from '../../app/types';
 
+const { Option } = Select;
+
 export const EditChannelForm: React.FC = () => {
+  const contacts = useAppSelector((state) => state.user.contacts);
   const channel = useAppSelector((state) => state.channel.channel);
   const isOpened = useAppSelector((state) => state.channel.isEditorOpened);
   const isLoading = useAppSelector((state) => state.channel.isEditing);
@@ -27,7 +41,7 @@ export const EditChannelForm: React.FC = () => {
   const [form] = Form.useForm();
   const dispatch = useAppDispatch();
 
-  useErrorMessage(error, editedSucceedChanged);
+  useErrorMessage(error, editingErrorChanged);
   useSuccessMessage('Інформацію змінено', succeed, editedSucceedChanged);
 
   useEffect(() => {
@@ -111,6 +125,37 @@ export const EditChannelForm: React.FC = () => {
           >
             <Input placeholder="Опис каналу (не обов'язково)" />
           </Form.Item>
+
+          {/* <Form.Item name="members" initialValue={channel?.members ?? []}>
+            <Select
+              mode="multiple"
+              style={{ width: '100%' }}
+              placeholder="Виберіть учасників зі свого списку контактів"
+              defaultValue={channel?.members.map((c) => (
+                <Option value={c.id} key={c.id}>
+                  <div className="flex gap-2 items-center">
+                    <Avatar src={c.photo} size={20} />
+                    <Typography.Text>{c.name} </Typography.Text>
+                    <Typography.Text type="secondary">
+                      ({c.name})
+                    </Typography.Text>
+                  </div>
+                </Option>
+              ))}
+            >
+              {contacts.map((c) => (
+                <Option value={c.id} key={c.id}>
+                  <div className="flex gap-2 items-center">
+                    <Avatar src={c.photo} size={20} />
+                    <Typography.Text>{c.name} </Typography.Text>
+                    <Typography.Text type="secondary">
+                      ({c.name})
+                    </Typography.Text>
+                  </div>
+                </Option>
+              ))}
+            </Select>
+          </Form.Item> */}
         </Form>
       </div>
     </Modal>

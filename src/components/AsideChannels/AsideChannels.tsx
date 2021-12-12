@@ -1,4 +1,4 @@
-import React, { UIEvent } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 
@@ -16,33 +16,45 @@ import {
 } from '../../features/user/userSlice';
 import { creatorOpened } from '../../features/channel/channelSlice';
 import { useNavigate } from 'react-router';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import { Spin } from 'antd';
 
 export const AsideChannels: React.FC = () => {
+  const scrollRef = useRef<HTMLElement>(null);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const channels = useAppSelector((state) => state.user.channels);
-  const total = useAppSelector((state) => state.user.total);
-  const count = useAppSelector((state) => state.user.count);
+  const total = useAppSelector((state) => state.user.channelsTotal);
+  const count = useAppSelector((state) => state.user.channelsCount);
   const isFetching = useAppSelector((state) => state.user.isChannelsFetching);
   const error = useAppSelector((state) => state.user.channelsFetchingError);
 
   useErrorMessage(error, channelsFetchingErrorChanged);
   useLoading('Завантження каналів...', isFetching);
 
-  const lastPortion = useAppSelector((state) => state.user.lastPortion);
+  const lastPortion = useAppSelector((state) => state.user.channelsLastPortion);
 
-  const scrollHandler = (e: UIEvent<HTMLElement>) => {
-    if (!isFetching && (total === null || lastPortion * count < total)) {
-      const scrollHeight = e.currentTarget.scrollHeight;
-      const clientHeight = e.currentTarget.clientHeight;
+  const loadMoreChannels = useCallback(() => {
+    dispatch(
+      fetchUserChannels({
+        count: count,
+        portion: lastPortion + 1,
+      })
+    );
+  }, [count, dispatch, lastPortion]);
 
-      const top = e.currentTarget.scrollTop;
-      let bottom = scrollHeight - top - clientHeight;
-      if (bottom < 30) {
-        dispatch(fetchUserChannels({ portion: lastPortion + 1, count }));
-      }
+  useEffect(() => {
+    if (!scrollRef.current || channels.length >= (total ?? 0)) {
+      return;
     }
-  };
+
+    if (
+      channels.length &&
+      scrollRef.current.scrollHeight === scrollRef.current.clientHeight
+    ) {
+      loadMoreChannels();
+    }
+  }, [channels.length, loadMoreChannels, total]);
 
   const openForm = () => {
     dispatch(creatorOpened());
@@ -50,15 +62,28 @@ export const AsideChannels: React.FC = () => {
 
   return (
     <aside
-      className="flex flex-col items-center bg-gray-100 overflow-y-scroll"
-      onScroll={scrollHandler}
+      id={'scrollableChannels'}
+      ref={scrollRef}
+      className="flex flex-col items-center bg-gray-100 overflow-y-auto"
     >
       <AsideButton Icon={SearchOutlined} onClick={() => navigate('/search')} />
       <AsideButton Icon={PlusOutlined} onClick={openForm} />
 
-      {channels
-        .map((channel) => <AsideChannel key={channel.id} channel={channel} />)
-        .reverse()}
+      <InfiniteScroll
+        dataLength={count * lastPortion}
+        next={loadMoreChannels}
+        hasMore={(total ?? 0) > channels.length}
+        loader={
+          <div className="w-full h-14 flex items-center justify-center">
+            <Spin />
+          </div>
+        }
+        scrollableTarget="scrollableChannels"
+      >
+        {channels
+          .map((channel) => <AsideChannel key={channel.id} channel={channel} />)
+          .reverse()}
+      </InfiniteScroll>
     </aside>
   );
 };

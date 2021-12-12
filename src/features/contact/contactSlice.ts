@@ -5,27 +5,18 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { WithId, WithPhoto } from '../../app/types';
 import { User } from '../../app/types';
 import { userChanged } from '../search/searchSlice';
+import { addUserContact, removeUserContact } from '../user/userSlice';
 
 export interface ContactState {
-  contacts: (User & WithId & WithPhoto)[];
-
   contactsInProcess: number[];
   addingError: string | null;
   removingError: string | null;
-
-  isContactsFetching: boolean;
-  fetchingError: string | null;
 }
 
 const initialState: ContactState = {
-  contacts: [],
-
   contactsInProcess: [],
   addingError: null,
   removingError: null,
-
-  isContactsFetching: false,
-  fetchingError: null,
 };
 
 export const addContact = createAsyncThunk<User & WithId & WithPhoto, number>(
@@ -44,10 +35,11 @@ export const addContact = createAsyncThunk<User & WithId & WithPhoto, number>(
       if (user) {
         const newUser: User & WithId & WithPhoto = {
           ...user,
-          contact: true,
+          isContact: true,
         };
 
         dispatch(userChanged(newUser));
+        dispatch(addUserContact(newUser));
 
         return newUser;
       }
@@ -83,9 +75,9 @@ export const removeContact = createAsyncThunk<
       if (user) {
         const newUser: User & WithId & WithPhoto = {
           ...user,
-          contact: false,
+          isContact: false,
         };
-
+        dispatch(removeUserContact(user.id));
         dispatch(userChanged(newUser));
 
         return newUser;
@@ -117,7 +109,6 @@ const contactSlice = createSlice({
         state.contactsInProcess = state.contactsInProcess.filter(
           (id) => id !== action.meta.arg
         );
-        state.contacts.push(action.payload);
       })
       .addCase(addContact.rejected, (state, action) => {
         state.contactsInProcess = state.contactsInProcess.filter(
@@ -133,7 +124,6 @@ const contactSlice = createSlice({
         state.contactsInProcess = state.contactsInProcess.filter(
           (id) => id !== action.meta.arg
         );
-        state.contacts = state.contacts.filter((c) => c.id !== action.meta.arg);
       })
       .addCase(removeContact.rejected, (state, action) => {
         state.contactsInProcess = state.contactsInProcess.filter(

@@ -1,12 +1,12 @@
 import { directAPI } from './../direct/directAPI';
-import { WithId } from './../../app/types';
+import { Message, Response, User, WithId, WithPhoto } from './../../app/types';
 import { AxiosError } from 'axios';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { Direct, ItemsResponse } from '../../app/types';
-import { Message } from '../../app/types';
+import { ItemsResponse } from '../../app/types';
+import { userAPI } from '../user/userAPI';
 
 export interface DirectState {
-  direct: Direct | null;
+  contact: (User & WithId & WithPhoto) | null;
   messages: (Message & WithId)[];
   total: number | null;
   lastPortion: number;
@@ -15,36 +15,36 @@ export interface DirectState {
   isMessagesFetching: boolean;
   messagesFetchingError: string | null;
 
-  isDirectFetching: boolean;
-  directFetchingError: string | null;
+  isContactFetching: boolean;
+  contactFetchingError: null | string;
 }
 
 const initialState: DirectState = {
-  direct: null,
+  contact: null,
   messages: [],
   total: null,
   lastPortion: 0,
-  count: 10,
+  count: 7,
 
   isMessagesFetching: false,
   messagesFetchingError: null,
 
-  isDirectFetching: false,
-  directFetchingError: null,
+  isContactFetching: false,
+  contactFetchingError: null,
 };
 
-export const fetchDirect = createAsyncThunk<
-  Direct,
+export const fetchContact = createAsyncThunk<
+  Response<User & WithId & WithPhoto>,
   number,
   { rejectValue: string }
 >(
-  'direct/fetched',
+  'direct/contactFetched',
   async (id: number, { rejectWithValue, dispatch, getState }) => {
     const state = getState() as { direct: DirectState };
     try {
-      const response = await directAPI.get(id);
-      if (response.errors[0]) {
-        return rejectWithValue(response.errors[0]);
+      const response = await userAPI.get(id);
+      if (response.data.errors[0]) {
+        return rejectWithValue(response.data.errors[0]);
       }
 
       dispatch(
@@ -58,7 +58,7 @@ export const fetchDirect = createAsyncThunk<
       return response.data;
     } catch (e) {
       const error = e as AxiosError;
-      if (error.response && error.response.status === 404) {
+      if (error.response && error.response.status === 401) {
         return rejectWithValue(error.response.data.errors[0]);
       }
       return rejectWithValue(
@@ -82,14 +82,16 @@ export const fetchMessages = createAsyncThunk<
     try {
       const response = await directAPI.getMessages({ id, page, count });
 
-      if (response.errors[0]) {
-        return rejectWithValue(response.errors[0]);
+      if (response.data.errors[0]) {
+        return rejectWithValue(response.data.errors[0]);
       }
 
-      return response;
+      return response.data;
     } catch (e) {
       const error = e as AxiosError;
-
+      if (error.response && error.response.status === 401) {
+        return rejectWithValue(error.response.data.errors[0]);
+      }
       return rejectWithValue(
         error.response?.statusText ?? 'Some error occured'
       );
@@ -112,19 +114,23 @@ const directSlice = createSlice({
     messagesChanged: (state, action) => {
       state.messages = action.payload;
     },
+
+    messageslastPortionChanged: (state, action) => {
+      state.lastPortion = action.payload;
+    },
   },
   extraReducers: (builder) =>
     builder
-      .addCase(fetchDirect.pending, (state) => {
-        state.isDirectFetching = true;
+      .addCase(fetchContact.pending, (state) => {
+        state.isContactFetching = true;
       })
-      .addCase(fetchDirect.fulfilled, (state, action) => {
-        state.isDirectFetching = false;
-        state.direct = action.payload;
+      .addCase(fetchContact.fulfilled, (state, action) => {
+        state.isContactFetching = false;
+        state.contact = action.payload.data;
       })
-      .addCase(fetchDirect.rejected, (state, action) => {
-        state.isDirectFetching = false;
-        state.directFetchingError = action.error.message ?? null;
+      .addCase(fetchContact.rejected, (state, action) => {
+        state.isContactFetching = false;
+        state.contactFetchingError = action.payload ?? null;
       })
 
       .addCase(fetchMessages.pending, (state) => {
@@ -137,10 +143,11 @@ const directSlice = createSlice({
       })
       .addCase(fetchMessages.rejected, (state, action) => {
         state.isMessagesFetching = false;
-        state.messagesFetchingError = action.error.message ?? null;
+        state.messagesFetchingError = action.payload ?? null;
       }),
 });
 
-export const { messageAdded, messagesChanged } = directSlice.actions;
+export const { messageAdded, messagesChanged, messageslastPortionChanged } =
+  directSlice.actions;
 
 export default directSlice.reducer;

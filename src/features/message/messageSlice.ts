@@ -3,7 +3,7 @@ import { AuthState } from './../auth/authSlice';
 import { messageAPI } from './messageAPI';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { DirectState, messageAdded } from '../direct/directSlice';
-import { Message, MessageCreatedData } from './../../app/types';
+import { MessageCreatedData, Message, Response } from './../../app/types';
 export interface MessageState {
   message: Message | null;
 
@@ -18,32 +18,40 @@ const initialState: MessageState = {
   sendingError: null,
 };
 
-export const sendMessage = createAsyncThunk<MessageCreatedData, string>(
+export const sendMessage = createAsyncThunk<
+  Response<MessageCreatedData>,
+  string
+>(
   'message/sended',
   async (text: string, { getState, dispatch, rejectWithValue }) => {
     const state = getState() as { direct: DirectState; auth: AuthState };
-    const contactId = state.direct.direct?.contact.id;
+    const contactId = state.direct.contact?.id;
     const authId = state.auth.id;
 
     try {
-      if (contactId) {
-        const message = {
+      if (contactId && authId) {
+        const response = await messageAPI.create({
+          receiverId: contactId,
+          authorId: authId,
           text,
-        };
-
-        const response = await messageAPI.create(message);
+        });
 
         dispatch(
-          messageAdded({ id: response.data.id, ...message, authorId: authId })
+          messageAdded({
+            id: response.data.data.id,
+            text,
+            authorId: authId,
+            receiverId: contactId,
+          })
         );
         return response.data;
       }
 
-      return rejectWithValue('There is no contact id provided');
+      return rejectWithValue('There is no user id provided');
     } catch (e) {
       const error = e as AxiosError;
 
-      const statuses = [401, 404];
+      const statuses = [401];
 
       if (error.response?.status && statuses.includes(error.response.status)) {
         return rejectWithValue(error.response.data.errors[0]);

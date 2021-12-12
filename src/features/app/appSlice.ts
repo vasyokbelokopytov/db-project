@@ -1,4 +1,9 @@
-import { fetchUser, fetchUserChannels, UserState } from './../user/userSlice';
+import {
+  fetchUser,
+  fetchUserChannels,
+  fetchUserContacts,
+  UserState,
+} from './../user/userSlice';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
 interface AppState {
@@ -21,8 +26,14 @@ export const init = createAsyncThunk(
       dispatch(fetchUser(id)).unwrap(),
       dispatch(
         fetchUserChannels({
-          portion: state.user.lastPortion + 1,
-          count: state.user.count,
+          portion: 1,
+          count: state.user.channelsCount,
+        })
+      ).unwrap(),
+      dispatch(
+        fetchUserContacts({
+          count: state.user.contactsCount,
+          portion: 1,
         })
       ).unwrap(),
     ]);

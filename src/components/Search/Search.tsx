@@ -1,10 +1,15 @@
 import { Pagination } from 'antd';
 import React, { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import {
+  useAppDispatch,
+  useAppSelector,
+  useErrorMessage,
+} from '../../app/hooks';
 import {
   contactChanged,
   countChanged,
+  fetchingErrorChanged,
   pageChanged,
   queryChanged,
 } from '../../features/search/searchSlice';
@@ -20,6 +25,8 @@ export const Search: React.FC = () => {
   const page = useAppSelector((state) => state.search.page);
   const count = useAppSelector((state) => state.search.count);
   const isFetching = useAppSelector((state) => state.search.isUsersFetching);
+  const fethingError = useAppSelector((state) => state.search.fetchingError);
+  useErrorMessage(fethingError, fetchingErrorChanged);
   const dispatch = useAppDispatch();
 
   const queryParam = params.get('query');

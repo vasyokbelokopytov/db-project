@@ -16,6 +16,7 @@ export interface SearchFormData {
 
 export const SearchForm: React.FC<Props> = ({ onSubmit }) => {
   const query = useAppSelector((state) => state.search.query);
+
   const contact = useAppSelector((state) => state.search.contact);
   const isFetching = useAppSelector((state) => state.search.isUsersFetching);
 
@@ -23,7 +24,7 @@ export const SearchForm: React.FC<Props> = ({ onSubmit }) => {
 
   useEffect(() => {
     form.resetFields();
-  }, [form, query]);
+  }, [form, query, contact]);
 
   return (
     <Form name="search" form={form} onFinish={onSubmit}>

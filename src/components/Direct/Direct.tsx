@@ -4,23 +4,20 @@ import { UserOutlined } from '@ant-design/icons';
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
+
 import {
-  editorOpened,
-  fetchChannel,
-  postsChanged,
-} from '../../features/channel/channelSlice';
-import {
-  fetchDirect,
+  fetchContact,
   messagesChanged,
+  messageslastPortionChanged,
 } from '../../features/direct/directSlice';
 import { Display } from '../Direct/Display';
 import { Field } from '../Direct/Field';
 
 export const Direct: React.FC = () => {
-  const direct = useAppSelector((state) => state.direct.direct);
-  const isFetching = useAppSelector((state) => state.direct.isDirectFetching);
+  const contact = useAppSelector((state) => state.direct.contact);
+  const isFetching = useAppSelector((state) => state.direct.isContactFetching);
   const fetchingError = useAppSelector(
-    (state) => state.direct.directFetchingError
+    (state) => state.direct.contactFetchingError
   );
 
   const dispatch = useAppDispatch();
@@ -30,30 +27,31 @@ export const Direct: React.FC = () => {
   useEffect(() => {
     if (
       params.contactId &&
-      (direct === null || +params.contactId !== direct.contact.id)
+      (contact === null || +params.contactId !== contact.id)
     ) {
       dispatch(messagesChanged(null));
-      dispatch(fetchDirect(+params.contactId));
+      dispatch(messageslastPortionChanged(0));
+      dispatch(fetchContact(+params.contactId));
     }
-  }, [params.contactId, direct, dispatch]);
+  }, [params.contactId, dispatch, contact]);
 
   const clickHandler = () => {
     if (params.channelId) {
-      dispatch(fetchDirect(+params.channelId));
+      dispatch(fetchContact(+params.channelId));
     }
   };
 
-  if (direct && !fetchingError && !isFetching)
+  if (contact && !fetchingError && !isFetching)
     return (
       <Card
         title={
           <div className="flex gap-2 items-center">
             <Avatar
-              src={direct.contact.photo}
+              src={contact.photo}
               icon={<UserOutlined />}
               size={'large'}
             />
-            <p>{direct.contact.name}</p>
+            <p>{contact.name}</p>
           </div>
         }
         extra={<Typography.Link>Edit</Typography.Link>}
