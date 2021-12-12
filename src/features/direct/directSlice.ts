@@ -138,7 +138,13 @@ const directSlice = createSlice({
       })
       .addCase(fetchMessages.fulfilled, (state, action) => {
         state.isMessagesFetching = false;
-        state.messages = action.payload.data.items;
+        if (state.messages) {
+          state.messages = [...action.payload.data.items, ...state.messages];
+        } else {
+          state.messages = action.payload.data.items;
+        }
+
+        state.lastPortion = state.lastPortion + 1;
         state.total = action.payload.data.total;
       })
       .addCase(fetchMessages.rejected, (state, action) => {
