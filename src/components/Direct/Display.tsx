@@ -1,11 +1,11 @@
-import { Avatar, ConfigProvider, Empty, Spin } from 'antd';
+import { Avatar, ConfigProvider, Empty } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { List } from 'antd';
-import { useAppSelector } from '../../app/hooks';
-import InfiniteScroll from 'react-infinite-scroll-component';
+import { useAppSelector, useErrorMessage } from '../../app/hooks';
 import { useDispatch } from 'react-redux';
 import { fetchMessages } from '../../features/direct/directSlice';
+import { fetchingErrorChanged } from '../../features/search/searchSlice';
 
 export const Display: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -16,14 +16,17 @@ export const Display: React.FC = () => {
   const total = useAppSelector((state) => state.direct.total);
   const messages = useAppSelector((state) => state.direct.messages);
   const isFetching = useAppSelector((state) => state.direct.isMessagesFetching);
+  const fetchingError = useAppSelector((state) => state.message.sendingError);
   const authUser = useAppSelector((state) => state.user.user);
+
+  useErrorMessage(fetchingError, fetchingErrorChanged);
 
   const dispatch = useDispatch();
 
-  const loadMoreMessages = useCallback(() => {
+  const loadMoreMessages = () => {
     if (!contact) return;
     if ((total ?? 0) <= page * count) return;
-    if (scrollRef.current && scrollRef.current.scrollTop < 120) {
+    if (scrollRef.current && scrollRef.current.scrollTop < 120 && !isFetching) {
       setBottomOffset(
         scrollRef.current.scrollHeight -
           scrollRef.current.scrollTop -
@@ -37,7 +40,7 @@ export const Display: React.FC = () => {
         })
       );
     }
-  }, [contact, count, dispatch, page, total]);
+  };
 
   useEffect(() => {
     if (!scrollRef.current) return;
@@ -88,15 +91,12 @@ export const Display: React.FC = () => {
           />
         )}
       >
-        <div className="flex justify-center">
-          <Spin />
-        </div>
-
         <List
           className={`${
             !messages?.length && 'flex justify-center items-center'
           }`}
           dataSource={messages ? messages : undefined}
+          loading={isFetching}
           renderItem={(message) => (
             <List.Item key={message.id} className="bg-white rounded-sm mb-2">
               {message.authorId === contact?.id && (

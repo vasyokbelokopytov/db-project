@@ -26,11 +26,9 @@ export const AsideChannels: React.FC = () => {
   const channels = useAppSelector((state) => state.user.channels);
   const total = useAppSelector((state) => state.user.channelsTotal);
   const count = useAppSelector((state) => state.user.channelsCount);
-  const isFetching = useAppSelector((state) => state.user.isChannelsFetching);
   const error = useAppSelector((state) => state.user.channelsFetchingError);
 
   useErrorMessage(error, channelsFetchingErrorChanged);
-  useLoading('Завантження каналів...', isFetching);
 
   const lastPortion = useAppSelector((state) => state.user.channelsLastPortion);
 
@@ -70,11 +68,11 @@ export const AsideChannels: React.FC = () => {
       <AsideButton Icon={PlusOutlined} onClick={openForm} />
 
       <InfiniteScroll
-        dataLength={count * lastPortion}
+        dataLength={channels.length || count * lastPortion}
         next={loadMoreChannels}
         hasMore={(total ?? 0) > channels.length}
         loader={
-          <div className="w-full h-14 flex items-center justify-center">
+          <div className="w-full h-24 flex items-center justify-center">
             <Spin />
           </div>
         }

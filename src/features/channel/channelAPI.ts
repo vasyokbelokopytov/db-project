@@ -23,10 +23,7 @@ export const channelAPI = {
   },
 
   update: (channel: Channel & WithId & WithPhoto) => {
-    return template.put<Response<Channel & WithId & WithPhoto>>(
-      `channel/${channel.id}`,
-      { ...channel }
-    );
+    return template.put<Response<{}>>(`channel/${channel.id}`, { ...channel });
   },
 
   getPosts: ({

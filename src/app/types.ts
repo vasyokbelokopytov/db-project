@@ -35,7 +35,7 @@ export interface Channel {
   name: string;
   description: string;
   creatorId: number;
-  members: number[];
+  members: string[];
 }
 
 export type ChannelPreview = Pick<

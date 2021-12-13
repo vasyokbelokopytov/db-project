@@ -98,7 +98,15 @@ export const removeContact = createAsyncThunk<
 const contactSlice = createSlice({
   name: 'contact',
   initialState,
-  reducers: {},
+  reducers: {
+    addingErrorChanged: (state, action) => {
+      state.addingError = action.payload;
+    },
+
+    removingErrorChanged: (state, action) => {
+      state.removingError = action.payload;
+    },
+  },
 
   extraReducers: (builder) =>
     builder
@@ -133,6 +141,7 @@ const contactSlice = createSlice({
       }),
 });
 
-export const {} = contactSlice.actions;
+export const { addingErrorChanged, removingErrorChanged } =
+  contactSlice.actions;
 
 export default contactSlice.reducer;

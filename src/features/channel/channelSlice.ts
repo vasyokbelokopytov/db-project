@@ -1,3 +1,4 @@
+import { AuthState } from './../auth/authSlice';
 import {
   Channel,
   ChannelCreatedData,
@@ -9,11 +10,11 @@ import {
 } from './../../app/types';
 import { channelAPI } from './channelAPI';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { addChannel } from '../user/userSlice';
 import { AxiosError } from 'axios';
+import { addChannel } from '../user/userSlice';
 
 export interface ChannelState {
-  channel: (Channel & WithId & WithPhoto) | null;
+  channel: (Channel & WithPhoto & WithId) | null;
 
   posts: (Post & WithId)[] | null;
   totalPosts: number | null;
@@ -101,7 +102,9 @@ export const createChannel = createAsyncThunk<
   { rejectValue: string }
 >(
   'channel/created',
-  async (channel: Channel & WithPhoto, { dispatch, rejectWithValue }) => {
+  async (channel, { dispatch, rejectWithValue, getState }) => {
+    const state = getState() as { auth: AuthState };
+    const authId = state.auth.id;
     try {
       const response = await channelAPI.create(channel);
 
@@ -109,17 +112,23 @@ export const createChannel = createAsyncThunk<
         return rejectWithValue(response.data.errors[0]);
       }
 
+      if (!authId) {
+        return rejectWithValue('No creatorId provided');
+      }
+
       if (response.data.data.id) {
+        dispatch(creatorClosed());
         dispatch(
           addChannel({
             id: response.data.data.id,
-            ...channel,
+            name: channel.name,
+            photo: channel.photo,
           })
         );
-        dispatch(creatorClosed());
+        return response.data;
+      } else {
+        return rejectWithValue('Unable to create channel');
       }
-
-      return response.data;
     } catch (e) {
       const error = e as AxiosError;
       if (error.response && error.response.status === 401) {
@@ -137,33 +146,26 @@ export const editChannel = createAsyncThunk<
   Channel & WithId & WithPhoto,
   Channel & WithId & WithPhoto,
   { rejectValue: string }
->(
-  'channel/edited',
-  async (
-    channel: Channel & WithId & WithPhoto,
-    { dispatch, rejectWithValue }
-  ) => {
-    try {
-      const response = await channelAPI.update(channel);
+>('channel/edited', async (channel, { dispatch, rejectWithValue }) => {
+  try {
+    const response = await channelAPI.update(channel);
 
-      if (response.data.errors[0]) {
-        return rejectWithValue(response.data.errors[0]);
-      }
-      dispatch(editorClosed());
-
-      return channel;
-    } catch (e) {
-      const error = e as AxiosError;
-      if (error.response && error.response.status === 401) {
-        return rejectWithValue(error.response.data.errors[0]);
-      }
-
-      return rejectWithValue(
-        error.response?.statusText ?? 'Some error occured'
-      );
+    if (response.data.errors[0]) {
+      return rejectWithValue(response.data.errors[0]);
     }
+    dispatch(editorClosed());
+
+    return channel;
+  } catch (e) {
+    const error = e as AxiosError;
+    const statuses = [401, 404];
+    if (error.response && statuses.includes(error.response.status)) {
+      return rejectWithValue(error.response.data.errors[0]);
+    }
+
+    return rejectWithValue(error.response?.statusText ?? 'Some error occured');
   }
-);
+});
 
 export const fetchPosts = createAsyncThunk<
   ItemsResponse<(Post & WithId)[]>,
@@ -264,7 +266,7 @@ const channelSlice = createSlice({
       .addCase(createChannel.pending, (state) => {
         state.isCreating = true;
       })
-      .addCase(createChannel.fulfilled, (state) => {
+      .addCase(createChannel.fulfilled, (state, action) => {
         state.isCreating = false;
         state.createdSucceed = true;
       })
@@ -289,14 +291,14 @@ const channelSlice = createSlice({
         state.isPostFetching = true;
       })
       .addCase(fetchPosts.fulfilled, (state, action) => {
-        state.isPostFetching = false;
         if (!state.posts) {
           state.posts = action.payload.data.items;
         } else {
-          state.posts = [...state.posts, ...action.payload.data.items];
+          state.posts = [...action.payload.data.items, ...state.posts];
         }
         state.lastPortion += 1;
         state.totalPosts = action.payload.data.total;
+        state.isPostFetching = false;
       })
       .addCase(fetchPosts.rejected, (state, action) => {
         state.isPostFetching = false;

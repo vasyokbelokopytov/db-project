@@ -18,6 +18,9 @@ export const Channel: React.FC = () => {
   const channel = useAppSelector((state) => state.channel.channel);
   const isFetching = useAppSelector((state) => state.channel.isFetching);
   const fetchingError = useAppSelector((state) => state.channel.fetchingError);
+  const postFetchingError = useAppSelector(
+    (state) => state.channel.postFetchingError
+  );
 
   const dispatch = useAppDispatch();
 
@@ -79,7 +82,7 @@ export const Channel: React.FC = () => {
       }}
     >
       {isFetching && !fetchingError && <Spin />}
-      {fetchingError && (
+      {(fetchingError || postFetchingError) && (
         <Result
           status="warning"
           title="Виникла помилка під час завантаження каналу"

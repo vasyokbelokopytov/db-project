@@ -68,7 +68,11 @@ const messageSlice = createSlice({
   name: 'message',
   initialState,
 
-  reducers: {},
+  reducers: {
+    sendingErrorChanged: (state, action) => {
+      state.sendingError = action.payload;
+    },
+  },
 
   extraReducers: (builder) =>
     builder
@@ -84,5 +88,7 @@ const messageSlice = createSlice({
         state.sendingError = action.error.message ?? null;
       }),
 });
+
+export const { sendingErrorChanged } = messageSlice.actions;
 
 export default messageSlice.reducer;

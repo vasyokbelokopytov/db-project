@@ -63,7 +63,11 @@ const postSlice = createSlice({
   name: 'post',
   initialState,
 
-  reducers: {},
+  reducers: {
+    sendingErrorChanged: (state, action) => {
+      state.sendingError = action.payload;
+    },
+  },
 
   extraReducers: (builder) =>
     builder
@@ -79,5 +83,7 @@ const postSlice = createSlice({
         state.sendingError = action.error.message ?? null;
       }),
 });
+
+export const { sendingErrorChanged } = postSlice.actions;
 
 export default postSlice.reducer;

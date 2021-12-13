@@ -111,7 +111,7 @@ export const CreateChannelForm: React.FC = () => {
               placeholder="Виберіть учасників зі свого списку контактів"
             >
               {contacts.map((c) => (
-                <Option value={c.id} key={c.id}>
+                <Option value={c.login} key={c.id}>
                   <div className="flex gap-2 items-center">
                     <Avatar src={c.photo} size={20} />
                     <Typography.Text>{c.name} </Typography.Text>

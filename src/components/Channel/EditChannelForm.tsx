@@ -7,6 +7,7 @@ import {
   Select,
   Typography,
   Tag,
+  Spin,
 } from 'antd';
 import CustomTagProps from 'rc-select/lib/generate';
 import { MessageOutlined } from '@ant-design/icons';
@@ -25,8 +26,14 @@ import {
   editorClosed,
 } from '../../features/channel/channelSlice';
 import { Channel } from '../../app/types';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import { fetchUserContacts } from '../../features/user/userSlice';
 
 const { Option } = Select;
+
+type FormData = Channel & {
+  members: { label: React.ReactNode; value: number }[];
+};
 
 export const EditChannelForm: React.FC = () => {
   const contacts = useAppSelector((state) => state.user.contacts);
@@ -35,6 +42,15 @@ export const EditChannelForm: React.FC = () => {
   const isLoading = useAppSelector((state) => state.channel.isEditing);
   const error = useAppSelector((state) => state.channel.editingError);
   const succeed = useAppSelector((state) => state.channel.editedSucceed);
+
+  const totalContacts = useAppSelector((state) => state.user.contactsTotal);
+  const isContactsFetching = useAppSelector(
+    (state) => state.user.isContactsFetching
+  );
+  const contactsCount = useAppSelector((state) => state.user.contactsCount);
+  const contactsPage = useAppSelector(
+    (state) => state.user.contactsLastPortion
+  );
 
   const { img, setImg, dummyRequest, beforeUpload, handleChange } =
     useImageUpload(channel ? channel.photo : null);
@@ -59,7 +75,25 @@ export const EditChannelForm: React.FC = () => {
     form.submit();
   };
 
-  const submitHandler = (formData: Channel) => {
+  const scrollHandler = (e: React.UIEvent) => {
+    const target = e.currentTarget;
+    const scrollBottom =
+      target.scrollHeight - target.scrollTop - target.clientHeight;
+    if (
+      scrollBottom < 50 &&
+      !isContactsFetching &&
+      contactsCount * contactsPage < (totalContacts ?? 0)
+    ) {
+      dispatch(
+        fetchUserContacts({
+          count: contactsCount,
+          portion: contactsPage + 1,
+        })
+      );
+    }
+  };
+
+  const submitHandler = (formData: FormData) => {
     console.log(formData);
 
     if (channel) {
@@ -126,36 +160,30 @@ export const EditChannelForm: React.FC = () => {
             <Input placeholder="Опис каналу (не обов'язково)" />
           </Form.Item>
 
-          {/* <Form.Item name="members" initialValue={channel?.members ?? []}>
+          <Form.Item name="members" initialValue={channel?.members}>
             <Select
               mode="multiple"
               style={{ width: '100%' }}
               placeholder="Виберіть учасників зі свого списку контактів"
-              defaultValue={channel?.members.map((c) => (
-                <Option value={c.id} key={c.id}>
-                  <div className="flex gap-2 items-center">
-                    <Avatar src={c.photo} size={20} />
-                    <Typography.Text>{c.name} </Typography.Text>
-                    <Typography.Text type="secondary">
-                      ({c.name})
-                    </Typography.Text>
-                  </div>
-                </Option>
-              ))}
+              onPopupScroll={scrollHandler}
+              dropdownRender={(menu) => (
+                <div>
+                  {menu}
+                  {isContactsFetching && (
+                    <div className="flex justify-center">
+                      <Spin />
+                    </div>
+                  )}
+                </div>
+              )}
             >
               {contacts.map((c) => (
-                <Option value={c.id} key={c.id}>
-                  <div className="flex gap-2 items-center">
-                    <Avatar src={c.photo} size={20} />
-                    <Typography.Text>{c.name} </Typography.Text>
-                    <Typography.Text type="secondary">
-                      ({c.name})
-                    </Typography.Text>
-                  </div>
+                <Option value={c.login} key={c.id}>
+                  <Typography.Text>{c.login} </Typography.Text>
                 </Option>
               ))}
             </Select>
-          </Form.Item> */}
+          </Form.Item>
         </Form>
       </div>
     </Modal>

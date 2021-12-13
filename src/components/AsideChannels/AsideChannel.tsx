@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Avatar, Tooltip } from 'antd';
 import { AsideChannelsItem } from './AsideChannelsItem';
-import { NavLink } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { ChannelPreview } from '../../app/types';
 
 interface Props {
@@ -9,10 +9,20 @@ interface Props {
 }
 
 export const AsideChannel: React.FC<Props> = ({ channel }) => {
+  const params = useParams();
+  const channelId = params.channelId;
+
+  useEffect(() => {
+    console.log(params.channelId);
+    console.log(channel.id);
+  }, [params, channel]);
+
   return (
-    <NavLink
+    <Link
       to={`channel/${channel.id}`}
-      className={({ isActive }) => (isActive ? 'bg-blue-100 rounded-lg' : '')}
+      className={
+        channelId && +channelId === channel.id ? 'bg-blue-100 rounded-lg' : ''
+      }
     >
       <AsideChannelsItem>
         <Tooltip title={channel.name} placement="right">
@@ -21,6 +31,6 @@ export const AsideChannel: React.FC<Props> = ({ channel }) => {
           </Avatar>
         </Tooltip>
       </AsideChannelsItem>
-    </NavLink>
+    </Link>
   );
 };

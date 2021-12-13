@@ -2,10 +2,14 @@ import { Avatar, List, ConfigProvider, Empty, Spin } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAppSelector } from '../../app/hooks';
+import { useAppSelector, useErrorMessage } from '../../app/hooks';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useDispatch } from 'react-redux';
 import { fetchUserContacts } from '../../features/user/userSlice';
+import {
+  addingErrorChanged,
+  removingErrorChanged,
+} from '../../features/contact/contactSlice';
 
 export const AsideContacts: React.FC = () => {
   const scrollRef = useRef<HTMLElement>(null);
@@ -13,6 +17,12 @@ export const AsideContacts: React.FC = () => {
   const contactsTotal = useAppSelector((state) => state.user.contactsTotal);
   const contactsCount = useAppSelector((state) => state.user.contactsCount);
   const contactPage = useAppSelector((state) => state.user.contactsLastPortion);
+  const addingError = useAppSelector((state) => state.contact.addingError);
+  const removingError = useAppSelector((state) => state.contact.removingError);
+
+  useErrorMessage(addingError, addingErrorChanged);
+  useErrorMessage(removingError, removingErrorChanged);
+
   const navigate = useNavigate();
   const params = useParams();
   const userId = params.contactId;
@@ -43,7 +53,9 @@ export const AsideContacts: React.FC = () => {
 
   return (
     <aside
-      className="flex-none w-56 border-l-2 p-2 overflow-auto"
+      className={`flex-none w-56 border-l-2 p-2 overflow-auto ${
+        !contacts.length && 'flex items-center'
+      }`}
       id="scrollableContacts"
       ref={scrollRef}
     >
@@ -67,9 +79,7 @@ export const AsideContacts: React.FC = () => {
           scrollableTarget="scrollableContacts"
         >
           <List
-            className={`w-full h-full ${
-              !contacts.length && 'flex items-center'
-            }`}
+            className={`w-full h-full`}
             itemLayout="horizontal"
             dataSource={[...contacts].reverse()}
             renderItem={(item) => (

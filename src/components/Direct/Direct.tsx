@@ -19,6 +19,9 @@ export const Direct: React.FC = () => {
   const fetchingError = useAppSelector(
     (state) => state.direct.contactFetchingError
   );
+  const messagesFetchingError = useAppSelector(
+    (state) => state.direct.messagesFetchingError
+  );
 
   const dispatch = useAppDispatch();
 
@@ -80,7 +83,7 @@ export const Direct: React.FC = () => {
       }}
     >
       {isFetching && !fetchingError && <Spin />}
-      {fetchingError && (
+      {(fetchingError || messagesFetchingError) && (
         <Result
           status="warning"
           title="Виникла помилка під час завантаження"
